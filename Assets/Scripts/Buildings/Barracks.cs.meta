@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 3e82491e4f441df45a01dcf521569a66
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - barracksStats: {fileID: 11400000, guid: d7998972ba1530744a6721fcbbaa7d5e, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

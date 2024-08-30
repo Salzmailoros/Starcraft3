@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 23ca8b737d7387b47ac8694c1e017ad2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - T1SoldierStats: {fileID: 11400000, guid: f1c18849aaa450444bd228ae798ebbb9, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

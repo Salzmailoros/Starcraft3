@@ -16,7 +16,10 @@ public class GridGenerator : MonoBehaviour
         GenerateGrid();
         
     }
-
+    public float GetTileSize()
+    {
+        return tileSize;
+    }
     private void GenerateGrid()
     {
         _grid = new Tile[gridWidth, gridHeight];

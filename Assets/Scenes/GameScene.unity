@@ -2046,7 +2046,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8702375304364480333, guid: d63df7e93e48c6c43bbd7eabe1d51996, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d63df7e93e48c6c43bbd7eabe1d51996, type: 3}
@@ -2215,6 +2215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectionManager: {fileID: 5193535}
+  buildingPlacer: {fileID: 1773272519}
 --- !u!4 &2069795546
 Transform:
   m_ObjectHideFlags: 0

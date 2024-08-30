@@ -39,6 +39,7 @@ public class BuildingPlacementManager : MonoBehaviour
                 TryPlaceBuilding();
             }
         }
+        if (Input.GetKeyDown(KeyCode.Escape)) { StopPlacingBuilding(); }        // press esc = cancel placing.
     }
 
     public void StartPlacingBuilding(BuildingStats buildingStats)
@@ -46,6 +47,19 @@ public class BuildingPlacementManager : MonoBehaviour
         currentBuildingStats = buildingStats;
         currentBuildingInstance = Instantiate(currentBuildingStats.buildingPrefab);
         isPlacingBuilding = true;
+    }
+    public void StopPlacingBuilding()       // cancel placing
+    {
+        DestroyImmediate(currentBuildingInstance);      //destroy building on mouse
+
+        foreach (Transform child in transform)          //destroy highlighted blocks
+        {
+            Destroy(child.gameObject);
+        }
+
+        currentBuildingStats = null;                    //reset
+        currentBuildingInstance = null;
+        isPlacingBuilding = false;
     }
 
     private void FollowMouse()
@@ -137,10 +151,12 @@ public class BuildingPlacementManager : MonoBehaviour
             }
         }
 
-        // Snap the building to the correct grid position
+        // Calculate the correct center position for the building
         Vector2 buildingCenter = gridGenerator.GridToWorldPosition(calcedCornerGridAdress);
-        buildingCenter.x += (currentBuildingStats.size.x - 1) * currentBuildingStats.size.x / 2 *0.32f;
-        buildingCenter.y += (currentBuildingStats.size.y - 1) * currentBuildingStats.size.x / 2 *0.32f;
+        float tileSize = gridGenerator.GetTileSize();
+
+        buildingCenter.x += (currentBuildingStats.size.x - 1) * tileSize / 2;
+        buildingCenter.y += (currentBuildingStats.size.y - 1) * tileSize / 2;
         currentBuildingInstance.transform.position = buildingCenter;
 
         // Clear highlighted tiles
@@ -153,4 +169,9 @@ public class BuildingPlacementManager : MonoBehaviour
         isPlacingBuilding = false;
         currentBuildingInstance = null;
     }
+    public bool isPlacing()
+    {
+        return isPlacingBuilding;
+    }
+
 }

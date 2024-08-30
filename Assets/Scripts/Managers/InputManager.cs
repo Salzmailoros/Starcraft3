@@ -4,6 +4,8 @@ public class InputManager : MonoBehaviour
 {
     private Camera mainCamera;
     [SerializeField] private SelectionManager selectionManager;
+    [SerializeField] private BuildingPlacementManager buildingPlacer;
+
 
     private void Start()
     {
@@ -17,6 +19,7 @@ public class InputManager : MonoBehaviour
 
     private void HandleMouseInput()
     {
+        if (buildingPlacer.isPlacing()) return;
         if (Input.GetMouseButtonDown(0))    //leftclick basic
         {
             selectionManager.ClearSelection();

@@ -1,8 +1,6 @@
-
-using System.Runtime;
 using UnityEngine;
 
-public abstract class BuildingBase : MonoBehaviour, IClickable, IDamageable, IObjectSpawner
+public abstract class BuildingBase : MonoBehaviour
 {
     protected BuildingStats stats;
     public int currentHealth;
@@ -29,26 +27,6 @@ public abstract class BuildingBase : MonoBehaviour, IClickable, IDamageable, IOb
         Destroy(gameObject);
     }
 
-    void IDamageable.Die()
-    {
-        Die();
-    }
-
-    void IClickable.OnLeftClick()
-    {
-        Debug.Log($" Selected Building of type : {stats.buildingName}");
-        // update the UI to show this buildings menu/stats/stuff
-    }
-
-    void IClickable.OnRightClick()
-    {
-        Debug.Log($"Targeted Building : {stats.buildingName}");
-    }
-
-    void IObjectSpawner.produceUnit()
-    {
-        throw new System.NotImplementedException();
-    }
     public BuildingStats ReturnInfoPanelInfo()
     {
         return stats;

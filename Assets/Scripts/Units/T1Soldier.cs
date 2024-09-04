@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class T1Soldier : UnitBase
+public class T1Soldier : UnitBase, IClickable, IDamageable, IMovable, IDamageDealer
 {
     [SerializeField] private UnitStats T1SoldierStats;
 

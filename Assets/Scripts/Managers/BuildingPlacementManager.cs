@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -16,6 +16,9 @@ public class BuildingPlacementManager : MonoBehaviour
     private void Start()
     {
         lastcalcedpos = new Vector2Int(500, 500);
+
+        PoolManager.Instance.CreatePool("placeablePoolKey", placeable, 10); 
+        PoolManager.Instance.CreatePool("notPlaceablePoolKey", notPlaceable, 10); 
     }
 
     private void OnEnable()
@@ -52,11 +55,7 @@ public class BuildingPlacementManager : MonoBehaviour
     {
         DestroyImmediate(currentBuildingInstance);      //destroy building on mouse
 
-        foreach (Transform child in transform)          //destroy highlighted blocks
-        {
-            Destroy(child.gameObject);
-        }
-
+        resetHighlightedObjects();
         currentBuildingStats = null;                    //reset
         currentBuildingInstance = null;
         isPlacingBuilding = false;
@@ -74,34 +73,44 @@ public class BuildingPlacementManager : MonoBehaviour
 
         if (lastcalcedpos == calcedCornerGridAdress)
         {
-            return;
+            return;//leave if still at same coordinates.
         }
+        resetHighlightedObjects();
+
         lastcalcedpos = calcedCornerGridAdress;
 
         // Clear existing highlighted tiles
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
 
         for (int x = 0; x < size.x; x++)
         {
             for (int y = 0; y < size.y; y++)
             {
+                GameObject highligtObject;
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
                 if (gridGenerator.IsValidGridPosition(tilepos))
                 {
-                    Instantiate(placeable,
+                    highligtObject = SpawnManager.Instance.SpawnFromPool("placeablePoolKey",
                         new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
                         gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                        Quaternion.identity, transform);
+                        Quaternion.identity);
+                    highligtObject.transform.SetParent(transform);
+                    //Instantiate(placeable,
+                    //    new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                    //    gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
+                    //    Quaternion.identity, transform);
                 }
                 else
                 {
-                    Instantiate(notPlaceable,
+                    highligtObject = SpawnManager.Instance.SpawnFromPool("notPlaceablePoolKey",
                         new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
                         gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                        Quaternion.identity, transform);
+                        Quaternion.identity);
+                    highligtObject.transform.SetParent(transform);
+
+                    //Instantiate(notPlaceable,
+                    //   new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                    //    gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
+                    //    Quaternion.identity, transform);
                 }
             }
         }
@@ -160,18 +169,33 @@ public class BuildingPlacementManager : MonoBehaviour
         currentBuildingInstance.transform.position = buildingCenter;
 
         // Clear highlighted tiles
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
+        resetHighlightedObjects();
+
 
         // Stop placing the building
         isPlacingBuilding = false;
         currentBuildingInstance = null;
     }
-    public bool isPlacing()
+    public bool IsPlacing()
     {
         return isPlacingBuilding;
     }
+    private void resetHighlightedObjects()
+    {
+        List<Transform> children = new List<Transform>();       //making list otherwise objects dont get returned properly.
+
+        foreach (Transform child in transform)
+        {
+            children.Add(child);
+        }
+
+        foreach (Transform child in children)
+        {
+            SpawnManager.Instance.ReturnToPool(child.GetComponent<PoolableObject>().ReturnKey(), child.gameObject);
+        }
+
+
+    }
+
 
 }

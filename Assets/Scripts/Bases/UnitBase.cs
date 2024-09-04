@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class UnitBase : MonoBehaviour, IClickable, IDamageable, IMovable, IDamageDealer
+public abstract class UnitBase : MonoBehaviour
 {
     protected UnitStats stats;
     public int currentHealth;

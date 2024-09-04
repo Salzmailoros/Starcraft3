@@ -3,7 +3,6 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     private Camera mainCamera;
-    [SerializeField] private SelectionManager selectionManager;
     [SerializeField] private BuildingPlacementManager buildingPlacer;
 
 
@@ -19,10 +18,10 @@ public class InputManager : MonoBehaviour
 
     private void HandleMouseInput()
     {
-        if (buildingPlacer.isPlacing()) return;
+        if (buildingPlacer.IsPlacing()) return;
         if (Input.GetMouseButtonDown(0))    //leftclick basic
         {
-            selectionManager.ClearSelection();
+            SelectionManager.Instance.ClearSelection();
             RaycastToClickable(true);
         }
         else if (Input.GetMouseButtonDown(1))   //rightclick basic.
@@ -42,7 +41,7 @@ public class InputManager : MonoBehaviour
                 if (isLeftClick)        //leftclick on clickable unit logic
                 {
                     clickable.OnLeftClick();
-                    selectionManager.SelectUnit(clickable);
+                    SelectionManager.Instance.SelectUnit(clickable);
                 }
                 else                  //rigtclick on clickable unit logic
                 {

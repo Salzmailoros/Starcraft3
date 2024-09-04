@@ -6,8 +6,8 @@ using static UnityEditor.Progress;
 
 public class InfoPanelUI : MonoBehaviour
 {
-    [SerializeField] private TMP_Text unitInfoText;
-    [SerializeField] private TMP_Text unitHPText;
+    [SerializeField] private TMP_Text selectionInfoText;
+    [SerializeField] private TMP_Text selectionHPText;
     [SerializeField] private Image unitImage;
     [SerializeField] private GameObject contentForInfoPanel;
 
@@ -36,6 +36,7 @@ public class InfoPanelUI : MonoBehaviour
     private void OnSelectionChanged(IClickable selectedObject)
     {
         currentSelectedObject = selectedObject;
+        SelectionManager.Instance.SelectUnit(selectedObject);
         UpdateStaticUI();
     }
 
@@ -44,7 +45,7 @@ public class InfoPanelUI : MonoBehaviour
         if (currentSelectedObject is UnitBase unit)
         {
             UnitStats stats = unit.ReturnInfoPanelInfo();
-            unitInfoText.text = stats.name;
+            selectionInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health ;
             handleSpawnableContent(null);
@@ -52,10 +53,10 @@ public class InfoPanelUI : MonoBehaviour
         else if (currentSelectedObject is BuildingBase building)
         {
             BuildingStats stats = building.ReturnInfoPanelInfo();
-            unitInfoText.text = stats.name;
+            selectionInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health;
-            if (building.GetComponent<IObjectSpawner>()!= null)         // if building has Iobjectspawner on
+            if (building.GetComponent<IUnitSpawner>()!= null)         // if building has Iobjectspawner on
             {
                 handleSpawnableContent(stats);
             }
@@ -66,9 +67,9 @@ public class InfoPanelUI : MonoBehaviour
         }
         else
         {
-            unitInfoText.text = "No selection";
+            selectionInfoText.text = "No selection";
             unitImage.sprite = null;
-            unitHPText.text = " ";
+            selectionHPText.text = " ";
             handleSpawnableContent(null);
 
         }
@@ -87,9 +88,15 @@ public class InfoPanelUI : MonoBehaviour
         {
             for (int i = 0; i < stats.ProduceableUnits.Length; i++)
             {
-                Instantiate(stats.ProduceableUnits[i].GetComponent<UnitStats>().uiSprite,
-                    Vector3.zero, Quaternion.identity, contentForInfoPanel.transform);
-                
+                Debug.Log(stats.ProduceableUnits[i].name);
+                GameObject newButton = new GameObject("UI Button");
+                newButton.AddComponent<Button>();
+                newButton.AddComponent<UIUnitSpawnButton>();
+                Image imageComponent = newButton.AddComponent<Image>();
+                imageComponent.sprite = stats.ProduceableUnits[i].uiSprite;
+
+                newButton.transform.SetParent(contentForInfoPanel.transform, false);
+
             }
         }
         
@@ -99,15 +106,15 @@ public class InfoPanelUI : MonoBehaviour
     {
         if (currentSelectedObject is UnitBase unit)
         {
-            unitHPText.text = "Hp :" + unit.currentHealth.ToString() + " / " + unitMaxHP;
+            selectionHPText.text = "Hp :" + unit.currentHealth.ToString() + " / " + unitMaxHP;
         }
         else if (currentSelectedObject is BuildingBase building)
         {
-            unitHPText.text = "Hp :" + building.currentHealth.ToString() + " / " + unitMaxHP;
+            selectionHPText.text = "Hp :" + building.currentHealth.ToString() + " / " + unitMaxHP;
         }
         else
         {
-            unitHPText.text = " ";
+            selectionHPText.text = " ";
         }
     }
 }

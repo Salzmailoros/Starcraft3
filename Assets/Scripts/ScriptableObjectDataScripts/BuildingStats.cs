@@ -14,6 +14,6 @@ public class BuildingStats : ScriptableObject
 
     public GameObject buildingPrefab;
 
-    public GameObject[] ProduceableUnits;
+    public UnitStats[] ProduceableUnits;
 
 }

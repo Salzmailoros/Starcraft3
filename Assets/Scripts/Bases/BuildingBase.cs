@@ -5,6 +5,7 @@ public abstract class BuildingBase : MonoBehaviour
     protected BuildingStats stats;
     public int currentHealth;
 
+
     public virtual void Initialize(BuildingStats stats)
     {
         this.stats = stats;

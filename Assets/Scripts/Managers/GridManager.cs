@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class GridGenerator : MonoBehaviour
+public class GridManager : Singleton<GridManager>
 {
-    [Header("Grid Settings")]
-    [SerializeField] private int gridWidth = 10;
-    [SerializeField] private int gridHeight = 10;
-    [SerializeField] private float tileSize = 1f;
-    [SerializeField] private bool showGrid = true;
-    [SerializeField] private GameObject tilePrefab;
+    
+    private int gridWidth = 48;
+    private int gridHeight = 24;
+    private float tileSize = 0.32f;
+    private bool showGrid = false;
+    private GameObject tilePrefab;
 
     private Tile[,] _grid;
 

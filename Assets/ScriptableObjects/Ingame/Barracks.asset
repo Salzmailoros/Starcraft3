@@ -21,6 +21,6 @@ MonoBehaviour:
   uiSprite: {fileID: 21300000, guid: 0fbd25784e62ff24c9e113461209939a, type: 3}
   buildingPrefab: {fileID: 9190173007482750779, guid: 7c70431ddb0998842a1b9fa328c76e12, type: 3}
   ProduceableUnits:
-  - {fileID: 2267660043737149208, guid: 43c1c2dbf60f91844b068018d5f9b9c9, type: 3}
-  - {fileID: 9215710734721362976, guid: d601b6a385f4c0e479b3428253a1b19a, type: 3}
-  - {fileID: 8702375304364480333, guid: d63df7e93e48c6c43bbd7eabe1d51996, type: 3}
+  - {fileID: 11400000, guid: f1c18849aaa450444bd228ae798ebbb9, type: 2}
+  - {fileID: 11400000, guid: 53189bdbf78dee24aa765ba7c2c8efa1, type: 2}
+  - {fileID: 11400000, guid: cb5605c7d709dfd468023822ae5ffe65, type: 2}

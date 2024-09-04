@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIButton : MonoBehaviour
+public class UIBuildingButton : MonoBehaviour
 {
     [SerializeField] private BuildingStats buildingStats; // The building data associated with this button
     private Button button;
@@ -12,7 +12,7 @@ public class UIButton : MonoBehaviour
         button = GetComponent<Button>();
         buttonImage = GetComponent<Image>();
 
-        // Set the UI elements based on the BuildingStats
+        // Set sprite incase I forget to update it after creating a new building
         buttonImage.sprite = buildingStats.buildingSprite;
 
         // Add the OnClick listener

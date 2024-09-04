@@ -1,14 +1,14 @@
 using UnityEngine;
 
-public class Barracks : BuildingBase, IClickable, IDamageable, IObjectSpawner
+public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 {
     [SerializeField] private BuildingStats barracksStats;
 
-    void IObjectSpawner.ProduceUnit(GameObject unitToSpawn)
+    void IUnitSpawner.ProduceUnit(GameObject unitToSpawn)
     {
         throw new System.NotImplementedException();
     }
-    public GameObject[] ProduceableUnits()
+    public UnitStats[] ProduceableUnits()
     {
         return barracksStats.ProduceableUnits;
     }

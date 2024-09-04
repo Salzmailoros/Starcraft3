@@ -10,19 +10,6 @@ public class SpawnManager : Singleton<SpawnManager>
             GameObject building = Instantiate(objectPrefab, position, Quaternion.identity);
             Debug.Log($"Placed building: {objectPrefab.name} at position {position}");
         }
-        else
-        {
-            // Logic for producing units (e.g., soldiers) from a building
-            GameObject unit = Instantiate(objectPrefab, position, Quaternion.identity);
-            Debug.Log($"Produced unit: {objectPrefab.name} at position {position}");
-        }
-    }
-
-    public void Spawn(UnitStats soldierData, Vector3 spawnPosition)
-    {
-        // Logic for producing soldiers
-        GameObject soldier = Instantiate(soldierData.unitPrefab, spawnPosition, Quaternion.identity);
-        Debug.Log($"Produced soldier: {soldierData.unitPrefab.name} at position {spawnPosition}");
     }
 
     public GameObject SpawnFromPool(string poolKey, Vector3 position, Quaternion rotation)

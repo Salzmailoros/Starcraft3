@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 public class BuildingPlacementManager : MonoBehaviour
 {
-    [SerializeField] private GridGenerator gridGenerator;
+    private GridManager gridManager;
     private BuildingStats currentBuildingStats;
     private GameObject currentBuildingInstance;
     private bool isPlacingBuilding = false;
@@ -16,7 +16,7 @@ public class BuildingPlacementManager : MonoBehaviour
     private void Start()
     {
         lastcalcedpos = new Vector2Int(500, 500);
-
+        gridManager = GridManager.Instance;
         PoolManager.Instance.CreatePool("placeablePoolKey", placeable, 10); 
         PoolManager.Instance.CreatePool("notPlaceablePoolKey", notPlaceable, 10); 
     }
@@ -69,7 +69,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
     private void HighlightTiles(Vector2 corner, Vector2 size)
     {
-        Vector2Int calcedCornerGridAdress = gridGenerator.WorldPositionToGrid(corner);
+        Vector2Int calcedCornerGridAdress = gridManager.WorldPositionToGrid(corner);
 
         if (lastcalcedpos == calcedCornerGridAdress)
         {
@@ -87,11 +87,11 @@ public class BuildingPlacementManager : MonoBehaviour
             {
                 GameObject highligtObject;
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
-                if (gridGenerator.IsValidGridPosition(tilepos))
+                if (gridManager.IsValidGridPosition(tilepos))
                 {
                     highligtObject = SpawnManager.Instance.SpawnFromPool("placeablePoolKey",
-                        new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                        gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
+                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
                         Quaternion.identity);
                     highligtObject.transform.SetParent(transform);
                     //Instantiate(placeable,
@@ -102,8 +102,8 @@ public class BuildingPlacementManager : MonoBehaviour
                 else
                 {
                     highligtObject = SpawnManager.Instance.SpawnFromPool("notPlaceablePoolKey",
-                        new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                        gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
+                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
                         Quaternion.identity);
                     highligtObject.transform.SetParent(transform);
 
@@ -127,7 +127,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
     private void TryPlaceBuilding()
     {
-        Vector2Int calcedCornerGridAdress = gridGenerator.WorldPositionToGrid(FindBuildingBottomLeftCorner());
+        Vector2Int calcedCornerGridAdress = gridManager.WorldPositionToGrid(FindBuildingBottomLeftCorner());
 
         // Check if all tiles are available
         for (int x = 0; x < currentBuildingStats.size.x; x++)
@@ -135,7 +135,7 @@ public class BuildingPlacementManager : MonoBehaviour
             for (int y = 0; y < currentBuildingStats.size.y; y++)
             {
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
-                Tile tile = gridGenerator.GetTile(tilepos);
+                Tile tile = gridManager.GetTile(tilepos);
 
                 if (tile == null || tile.IsOccupied)
                 {
@@ -151,7 +151,7 @@ public class BuildingPlacementManager : MonoBehaviour
             for (int y = 0; y < currentBuildingStats.size.y; y++)
             {
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
-                Tile tile = gridGenerator.GetTile(tilepos);
+                Tile tile = gridManager.GetTile(tilepos);
 
                 if (tile != null)
                 {
@@ -161,8 +161,8 @@ public class BuildingPlacementManager : MonoBehaviour
         }
 
         // Calculate the correct center position for the building
-        Vector2 buildingCenter = gridGenerator.GridToWorldPosition(calcedCornerGridAdress);
-        float tileSize = gridGenerator.GetTileSize();
+        Vector2 buildingCenter = gridManager.GridToWorldPosition(calcedCornerGridAdress);
+        float tileSize = gridManager.GetTileSize();
 
         buildingCenter.x += (currentBuildingStats.size.x - 1) * tileSize / 2;
         buildingCenter.y += (currentBuildingStats.size.y - 1) * tileSize / 2;

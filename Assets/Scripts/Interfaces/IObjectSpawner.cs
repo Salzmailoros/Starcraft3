@@ -1,4 +1,7 @@
+using UnityEngine;
+
 public interface IObjectSpawner
 {
-    void produceUnit();
+    void ProduceUnit(GameObject prefab);
+    GameObject[] ProduceableUnits ();
 }

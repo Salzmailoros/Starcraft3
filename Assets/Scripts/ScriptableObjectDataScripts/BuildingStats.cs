@@ -13,4 +13,7 @@ public class BuildingStats : ScriptableObject
     public Sprite uiSprite;
 
     public GameObject buildingPrefab;
+
+    public GameObject[] ProduceableUnits;
+
 }

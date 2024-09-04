@@ -1,12 +1,15 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InfoPanelUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text unitInfoText;
     [SerializeField] private TMP_Text unitHPText;
     [SerializeField] private Image unitImage;
+    [SerializeField] private GameObject contentForInfoPanel;
 
     private int unitMaxHP;
 
@@ -44,6 +47,7 @@ public class InfoPanelUI : MonoBehaviour
             unitInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health ;
+            handleSpawnableContent(null);
         }
         else if (currentSelectedObject is BuildingBase building)
         {
@@ -51,13 +55,44 @@ public class InfoPanelUI : MonoBehaviour
             unitInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health;
+            if (building.GetComponent<IObjectSpawner>()!= null)         // if building has Iobjectspawner on
+            {
+                handleSpawnableContent(stats);
+            }
+            else
+            {
+                handleSpawnableContent(null);                           //if building is not objectspawner
+            }
         }
         else
         {
             unitInfoText.text = "No selection";
             unitImage.sprite = null;
             unitHPText.text = " ";
+            handleSpawnableContent(null);
+
         }
+
+
+    }
+
+    private void handleSpawnableContent(BuildingStats stats)
+    {
+        if (stats == null) return;
+        foreach (GameObject item in contentForInfoPanel.transform)
+        {
+            Destroy(item);
+        }
+        if (stats.ProduceableUnits != null)
+        {
+            for (int i = 0; i < stats.ProduceableUnits.Length; i++)
+            {
+                Instantiate(stats.ProduceableUnits[i].GetComponent<UnitStats>().uiSprite,
+                    Vector3.zero, Quaternion.identity, contentForInfoPanel.transform);
+                
+            }
+        }
+        
     }
 
     private void UpdateHealth()

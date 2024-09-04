@@ -1,14 +1,8 @@
 using UnityEngine;
 
-public class PowerPlant : BuildingBase, IClickable, IDamageable, IObjectSpawner
+public class PowerPlant : BuildingBase, IClickable, IDamageable
 {
     [SerializeField] private BuildingStats PowerPlantStats;
-
-    void IObjectSpawner.produceUnit()
-    {
-        throw new System.NotImplementedException();
-    }
-
     void IDamageable.Die()
     {
         Die();
@@ -30,4 +24,5 @@ public class PowerPlant : BuildingBase, IClickable, IDamageable, IObjectSpawner
         Initialize(PowerPlantStats);
         GetComponent<SpriteRenderer>().sortingOrder = 1;
     }
-}
+
+} 

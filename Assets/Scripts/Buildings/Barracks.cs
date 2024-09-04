@@ -4,9 +4,13 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IObjectSpawner
 {
     [SerializeField] private BuildingStats barracksStats;
 
-    void IObjectSpawner.produceUnit()
+    void IObjectSpawner.ProduceUnit(GameObject unitToSpawn)
     {
         throw new System.NotImplementedException();
+    }
+    public GameObject[] ProduceableUnits()
+    {
+        return barracksStats.ProduceableUnits;
     }
 
     void IDamageable.Die()
@@ -30,4 +34,6 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IObjectSpawner
         Initialize(barracksStats);
         GetComponent<SpriteRenderer>().sortingOrder = 1;
     }
+
+    
 }

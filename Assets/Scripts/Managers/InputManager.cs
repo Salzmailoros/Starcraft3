@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class InputManager : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class InputManager : MonoBehaviour
     private void HandleMouseInput()
     {
         if (buildingPlacer.IsPlacing()) return;
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         if (Input.GetMouseButtonDown(0))    //leftclick basic
         {
             SelectionManager.Instance.ClearSelection();

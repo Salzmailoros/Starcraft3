@@ -1,10 +1,12 @@
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class BuildingBase : MonoBehaviour
 {
     protected BuildingStats stats;
     public int currentHealth;
-
+    public Vector2 gridPos;
 
     public virtual void Initialize(BuildingStats stats)
     {
@@ -28,7 +30,7 @@ public abstract class BuildingBase : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public BuildingStats ReturnInfoPanelInfo()
+    public BuildingStats BuildingStats()
     {
         return stats;
     }

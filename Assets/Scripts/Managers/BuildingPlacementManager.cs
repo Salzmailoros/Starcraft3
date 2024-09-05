@@ -90,27 +90,18 @@ public class BuildingPlacementManager : MonoBehaviour
                 if (gridManager.IsValidGridPosition(tilepos))
                 {
                     highligtObject = SpawnManager.Instance.SpawnFromPool("placeablePoolKey",
-                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                        Quaternion.identity);
+                        new Vector2((calcedCornerGridAdress.x + x), (calcedCornerGridAdress.y + y)),
+                        currentBuildingStats.size,false);
                     highligtObject.transform.SetParent(transform);
-                    //Instantiate(placeable,
-                    //    new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                    //    gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                    //    Quaternion.identity, transform);
+                   
                 }
                 else
                 {
                     highligtObject = SpawnManager.Instance.SpawnFromPool("notPlaceablePoolKey",
-                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                        Quaternion.identity);
+                        new Vector2((calcedCornerGridAdress.x + x), (calcedCornerGridAdress.y + y)),
+                        currentBuildingStats.size, false);
                     highligtObject.transform.SetParent(transform);
 
-                    //Instantiate(notPlaceable,
-                    //   new Vector3(gridGenerator.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
-                    //    gridGenerator.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y, 0),
-                    //    Quaternion.identity, transform);
                 }
             }
         }
@@ -137,10 +128,10 @@ public class BuildingPlacementManager : MonoBehaviour
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
                 Tile tile = gridManager.GetTile(tilepos);
 
-                if (tile == null || tile.IsOccupied)
+                if (tile == null || tile.IsOccupied)// Exit if any tile is occupied or invalid
                 {
                     Debug.Log("Cannot place building. Tile is occupied or out of bounds.");
-                    return; // Exit if any tile is occupied or invalid
+                    return; 
                 }
             }
         }
@@ -167,7 +158,7 @@ public class BuildingPlacementManager : MonoBehaviour
         buildingCenter.x += (currentBuildingStats.size.x - 1) * tileSize / 2;
         buildingCenter.y += (currentBuildingStats.size.y - 1) * tileSize / 2;
         currentBuildingInstance.transform.position = buildingCenter;
-
+        currentBuildingInstance.GetComponent<BuildingBase>().gridPos = calcedCornerGridAdress;
         // Clear highlighted tiles
         resetHighlightedObjects();
 

@@ -52,7 +52,7 @@ public class InfoPanelUI : MonoBehaviour
         }
         else if (currentSelectedObject is BuildingBase building)
         {
-            BuildingStats stats = building.ReturnInfoPanelInfo();
+            BuildingStats stats = building.BuildingStats();
             selectionInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health;

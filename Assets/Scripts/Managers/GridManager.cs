@@ -80,4 +80,9 @@ public class GridManager : Singleton<GridManager>
         else
         return !_grid[gridPosition.x, gridPosition.y].IsOccupied;
     }
+
+    public void SetTile(Vector2Int gridPosition,GameObject occuppant)
+    {
+        _grid[gridPosition.x,gridPosition.y].SetOccupied(occuppant);
+    }
 }

@@ -8,7 +8,12 @@ public class UIUnitSpawnButton : MonoBehaviour
 
     private void Awake()
     {
+        button = GetComponent<Button>();
         button.onClick.AddListener(OnClick);
+    }
+    public void SetUnitStats(UnitStats statsToSet)
+    {
+        unitStats=statsToSet;
     }
 
     private void OnClick()
@@ -16,13 +21,8 @@ public class UIUnitSpawnButton : MonoBehaviour
         BuildingBase currentBuilding = SelectionManager.Instance.GetSelectedObject() as BuildingBase;
         if (currentBuilding == null) { Debug.LogWarning("non building trying to spawn a unit"); return; };
 
-        SpawnManager.Instance.SpawnFromPool(unitStats.name, currentBuilding.gridPos, currentBuilding.BuildingStats().size,true);
-        //currentBuilding.gridPos;
-        // try to spawn at currentbuilding.gridpos converted by gridmanager. > also need to pass on buildingsize
-        // to make sure we do that thing where u spawn objects around the building. of which the logic should be dealt with by the spawnmanager with a new class.
-
-        //something something building.Iunitspawner.spawn => spawnmanager.instance.spawnfrompool.
-        //SpawnManager.Instance.SpawnFromPool(unitStats.name,SelectionManager.Instance.GetSelectedObject().transform.position,Quaternion.identity);
+        SpawnManager.Instance.SpawnSoldierFromPool(unitStats.name, currentBuilding.gridPos, currentBuilding.BuildingStats().size);
+        
     }
 
 }

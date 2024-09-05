@@ -4,9 +4,10 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 {
     [SerializeField] private BuildingStats barracksStats;
 
-    void IUnitSpawner.ProduceUnit(GameObject unitToSpawn)
+    private void Start()
     {
-        throw new System.NotImplementedException();
+        Initialize(barracksStats);
+        GetComponent<SpriteRenderer>().sortingOrder = 1;
     }
     public UnitStats[] ProduceableUnits()
     {
@@ -29,11 +30,20 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
         Debug.Log($"Targeted Building : {stats.buildingName}");
     }
 
-    private void Start()
+    void IUnitSpawner.CheckInitialisePool()
     {
-        Initialize(barracksStats);
-        GetComponent<SpriteRenderer>().sortingOrder = 1;
+        var unitlist = barracksStats.ProduceableUnits;
+        for (int i = 0; i < unitlist.Length; i++)
+        {
+            UnitStats unit = unitlist[i];
+
+            // Check if the pool exists
+            if (!PoolManager.Instance.DoesPoolExist(unit.name))
+            {
+                // create pool if not.
+                PoolManager.Instance.CreatePool(unit.name, unit.unitPrefab, 10);
+            }
+        }
     }
 
-    
 }

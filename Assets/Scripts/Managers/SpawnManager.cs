@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class SpawnManager : Singleton<SpawnManager>
@@ -13,28 +14,44 @@ public class SpawnManager : Singleton<SpawnManager>
         }
     }
 
-    public GameObject SpawnFromPool(string poolKey,Vector2 gridPos,Vector2 buildingSize,bool shouldFillSlots)
+    public GameObject SpawnHighlightObjects(string poolKey, Vector3 position)
     {
-        //pool
         GameObject obj = PoolManager.Instance.GetObjectFromPool(poolKey);
 
-        //calculate the objects position in world and match the grid.
-        var PosToSpawnAtGrid = getSpawnableAreaForSelected(gridPos, buildingSize);
-        var PosToSpawnAtInWorld = GridManager.Instance.GridToWorldPosition(PosToSpawnAtGrid);
-        // fill the correct grid position.
-        if (shouldFillSlots)
-        {
-            GridManager.Instance.SetTile(PosToSpawnAtGrid, obj);
-        }
         // pull object from pool and place in world
         if (obj != null)
         {
-            obj.transform.position = PosToSpawnAtInWorld;
-            obj.transform.rotation = Quaternion.identity;
+            obj.transform.position = position;
             obj.SetActive(true);
             return obj;
         }
         
+
+        Debug.LogWarning("PoolReturnedNull - Max objects for pool reached or pool isnt working properly");
+        return null;
+    }
+    public GameObject SpawnSoldierFromPool(string poolKey, Vector2 gridPos, Vector2 buildingSize)
+    {
+        var PosToSpawnAtGrid = getSpawnableAreaForSelected(gridPos, buildingSize);
+
+        if (PosToSpawnAtGrid == new Vector2Int(-1, -1))
+        {
+            Debug.LogWarning("NoSpawnableSpaces");
+            return null;
+        }
+       
+        var PosToSpawnAtInWorld = GridManager.Instance.GridToWorldPosition(PosToSpawnAtGrid);
+        GameObject obj = PoolManager.Instance.GetObjectFromPool(poolKey);
+        // fill grid position 
+        GridManager.Instance.SetTile(PosToSpawnAtGrid, obj);
+        // pull object from pool and place in world
+        if (obj != null)
+        {
+            obj.transform.position = PosToSpawnAtInWorld;
+            obj.SetActive(true);
+            return obj;
+        }
+
 
         Debug.LogWarning("PoolReturnedNull - Max objects for pool reached or pool isnt working properly");
         return null;
@@ -65,19 +82,19 @@ public class SpawnManager : Singleton<SpawnManager>
         // Right side (bottom to top)
         for (int y = 0; y <= height; y++)
         {
-            spawnablePositions.Add(new Vector2(gridPos.x + width + 1, gridPos.y + y));
+            spawnablePositions.Add(new Vector2(gridPos.x + width , gridPos.y + y));
         }
 
         // Top side (right to left)
-        for (int x = width; x >= 0; x--)
+        for (int x = width ; x >= 0; x--) 
         {
-            spawnablePositions.Add(new Vector2(gridPos.x + x, gridPos.y + height + 1));
+            spawnablePositions.Add(new Vector2(gridPos.x + x, gridPos.y + height ));
         }
 
         // Left side (top to bottom)
-        for (int y = height; y >= 0; y--)
+        for (int y = height ; y >= -1; y--) 
         {
-            spawnablePositions.Add(new Vector2(gridPos.x - 1, gridPos.y + y));
+            spawnablePositions.Add(new Vector2(gridPos.x-1 , gridPos.y + y));
         }
         for (int i = 0; i < spawnablePositions.Count; i++)
         {

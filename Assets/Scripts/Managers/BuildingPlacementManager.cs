@@ -89,17 +89,17 @@ public class BuildingPlacementManager : MonoBehaviour
                 var tilepos = new Vector2Int(calcedCornerGridAdress.x + x, calcedCornerGridAdress.y + y);
                 if (gridManager.IsValidGridPosition(tilepos))
                 {
-                    highligtObject = SpawnManager.Instance.SpawnFromPool("placeablePoolKey",
-                        new Vector2((calcedCornerGridAdress.x + x), (calcedCornerGridAdress.y + y)),
-                        currentBuildingStats.size,false);
+                    highligtObject = SpawnManager.Instance.SpawnHighlightObjects("placeablePoolKey",
+                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y));
                     highligtObject.transform.SetParent(transform);
                    
                 }
                 else
                 {
-                    highligtObject = SpawnManager.Instance.SpawnFromPool("notPlaceablePoolKey",
-                        new Vector2((calcedCornerGridAdress.x + x), (calcedCornerGridAdress.y + y)),
-                        currentBuildingStats.size, false);
+                    highligtObject = SpawnManager.Instance.SpawnHighlightObjects("notPlaceablePoolKey",
+                        new Vector3(gridManager.GridToWorldPosition(new Vector2Int(calcedCornerGridAdress.x + x, 0)).x,
+                        gridManager.GridToWorldPosition(new Vector2Int(0, calcedCornerGridAdress.y + y)).y));
                     highligtObject.transform.SetParent(transform);
 
                 }
@@ -161,7 +161,11 @@ public class BuildingPlacementManager : MonoBehaviour
         currentBuildingInstance.GetComponent<BuildingBase>().gridPos = calcedCornerGridAdress;
         // Clear highlighted tiles
         resetHighlightedObjects();
-
+        IUnitSpawner spawner = currentBuildingInstance.GetComponent<IUnitSpawner>();
+        if (spawner != null)  // If the object is a unit spawner create pool if not there already.
+        {
+            spawner.CheckInitialisePool();
+        }
 
         // Stop placing the building
         isPlacingBuilding = false;

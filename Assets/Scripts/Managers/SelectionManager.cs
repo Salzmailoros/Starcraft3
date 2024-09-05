@@ -13,6 +13,10 @@ public class SelectionManager : Singleton<SelectionManager>
         selectedObject = unit;
         OnSelectionChanged?.Invoke(selectedObject);
     }
+    public void UpdateSelectionto(IClickable newselection)
+    {
+        selectedObject = newselection;
+    }
 
     public void DeselectUnit()
     {

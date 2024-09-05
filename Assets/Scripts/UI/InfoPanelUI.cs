@@ -36,7 +36,7 @@ public class InfoPanelUI : MonoBehaviour
     private void OnSelectionChanged(IClickable selectedObject)
     {
         currentSelectedObject = selectedObject;
-        SelectionManager.Instance.SelectUnit(selectedObject);
+        SelectionManager.Instance.UpdateSelectionto(selectedObject);
         UpdateStaticUI();
     }
 
@@ -71,7 +71,6 @@ public class InfoPanelUI : MonoBehaviour
             unitImage.sprite = null;
             selectionHPText.text = " ";
             handleSpawnableContent(null);
-
         }
 
 
@@ -79,19 +78,26 @@ public class InfoPanelUI : MonoBehaviour
 
     private void handleSpawnableContent(BuildingStats stats)
     {
-        if (stats == null) return;
-        foreach (GameObject item in contentForInfoPanel.transform)
+        if (stats == null) 
         {
-            Destroy(item);
+            if (contentForInfoPanel.transform.childCount > 0)
+            {
+                foreach (GameObject child in contentForInfoPanel.transform)
+                {
+                    Destroy(child);
+                }
+            }
+            return;
         }
         if (stats.ProduceableUnits != null)
         {
             for (int i = 0; i < stats.ProduceableUnits.Length; i++)
             {
-                Debug.Log(stats.ProduceableUnits[i].name);
+                //Debug.Log(stats.ProduceableUnits[i].name);
                 GameObject newButton = new GameObject("UI Button");
                 newButton.AddComponent<Button>();
                 newButton.AddComponent<UIUnitSpawnButton>();
+                newButton.GetComponent<UIUnitSpawnButton>().SetUnitStats(stats.ProduceableUnits[i]);
                 Image imageComponent = newButton.AddComponent<Image>();
                 imageComponent.sprite = stats.ProduceableUnits[i].uiSprite;
 

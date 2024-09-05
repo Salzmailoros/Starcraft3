@@ -6,8 +6,6 @@ public class GridManager : Singleton<GridManager>
     private int gridWidth = 48;
     private int gridHeight = 24;
     private float tileSize = 0.32f;
-    private bool showGrid = false;
-    private GameObject tilePrefab;
 
     private Tile[,] _grid;
 
@@ -32,15 +30,6 @@ public class GridManager : Singleton<GridManager>
                 Tile tileData = new Tile(gridPosition.x, gridPosition.y);
                 _grid[x, y] = tileData;
                 _grid[x, y].ClearOccupancy();
-                if (showGrid)
-                {
-                    Instantiate(tilePrefab,
-                        new Vector3(
-                        (x - gridWidth / 2) * tileSize,
-                        (y - gridHeight / 2) * tileSize,
-                        0),
-                         Quaternion.identity, transform) ;
-                }
             }
         }
     }

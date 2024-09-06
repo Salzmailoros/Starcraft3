@@ -18,6 +18,7 @@ public class UIUnitSpawnButton : MonoBehaviour
 
     private void OnClick()
     {
+
         BuildingBase currentBuilding = SelectionManager.Instance.GetSelectedObject() as BuildingBase;
         if (currentBuilding == null) { Debug.LogWarning("non building trying to spawn a unit"); return; };
 

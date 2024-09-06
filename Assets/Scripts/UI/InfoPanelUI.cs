@@ -37,8 +37,21 @@ public class InfoPanelUI : MonoBehaviour
     {
         currentSelectedObject = selectedObject;
         SelectionManager.Instance.UpdateSelectionto(selectedObject);
-        UpdateStaticUI();
+
+        // Check for null and update UI accordingly
+        if (currentSelectedObject != null)
+        {
+            UpdateStaticUI();
+        }
+        else
+        {
+            selectionInfoText.text = "No selection";
+            unitImage.sprite = null;
+            selectionHPText.text = " ";
+            handleSpawnableContent(null);
+        }
     }
+
 
     private void UpdateStaticUI()
     {
@@ -78,35 +91,46 @@ public class InfoPanelUI : MonoBehaviour
 
     private void handleSpawnableContent(BuildingStats stats)
     {
-        if (stats == null) 
+        if (stats == null)
         {
-            if (contentForInfoPanel.transform.childCount > 0)
-            {
-                foreach (GameObject child in contentForInfoPanel.transform)
-                {
-                    Destroy(child);
-                }
-            }
+            ClearContentForInfoPanel();
             return;
         }
-        if (stats.ProduceableUnits != null)
+
+        // Safeguard before accessing ProduceableUnits
+        if (stats.ProduceableUnits != null && stats.ProduceableUnits.Length > 0)
         {
-            for (int i = 0; i < stats.ProduceableUnits.Length; i++)
+            foreach (var unitStats in stats.ProduceableUnits)
             {
-                //Debug.Log(stats.ProduceableUnits[i].name);
-                GameObject newButton = new GameObject("UI Button");
-                newButton.AddComponent<Button>();
-                newButton.AddComponent<UIUnitSpawnButton>();
-                newButton.GetComponent<UIUnitSpawnButton>().SetUnitStats(stats.ProduceableUnits[i]);
-                Image imageComponent = newButton.AddComponent<Image>();
-                imageComponent.sprite = stats.ProduceableUnits[i].uiSprite;
-
+                GameObject newButton = CreateUnitButton(unitStats);
                 newButton.transform.SetParent(contentForInfoPanel.transform, false);
-
             }
         }
-        
     }
+
+    // Clear the content panel
+    private void ClearContentForInfoPanel()
+    {
+        foreach (Transform child in contentForInfoPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    // Refactor button creation for reuse
+    private GameObject CreateUnitButton(UnitStats unitStats)
+    {
+        GameObject newButton = new GameObject("UI Button");
+        Button buttonComponent = newButton.AddComponent<Button>();
+        UIUnitSpawnButton uiUnitSpawnButton = newButton.AddComponent<UIUnitSpawnButton>();
+        uiUnitSpawnButton.SetUnitStats(unitStats);
+
+        Image imageComponent = newButton.AddComponent<Image>();
+        imageComponent.sprite = unitStats.uiSprite;
+
+        return newButton;
+    }
+
 
     private void UpdateHealth()
     {

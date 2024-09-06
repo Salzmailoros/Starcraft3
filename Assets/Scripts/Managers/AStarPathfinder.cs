@@ -13,27 +13,42 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
 
     public List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal)
     {
-        List<Tile> openSet = new List<Tile>();
-        HashSet<Tile> closedSet = new HashSet<Tile>();
-
-        // Dictionary that holds GCost, HCost, and Parent together
-        Dictionary<Tile, (int GCost, int HCost, Tile Parent)> pathData = new Dictionary<Tile, (int, int, Tile)>();
-
         Tile startTile = gridManager.GetTile(start);
         Tile goalTile = gridManager.GetTile(goal);
 
-        if (startTile == null || goalTile == null)
+        // Debugging
+        Debug.Log($"Start Tile: {start}, Goal Tile: {goal}");
+        Debug.Log($"StartTile is Occupied: {startTile.IsOccupied}, GoalTile is Occupied: {goalTile.IsOccupied}");
+
+        // Ignore the start tile's occupancy since the unit is already there
+        if (startTile == null)
         {
-            Debug.LogError("Invalid start or goal position.");
+            Debug.LogError($"Start tile is null at position {start}");
             return null;
         }
+
+        if (goalTile == null)
+        {
+            Debug.LogError($"Goal tile is null at position {goal}");
+            return null;
+        }
+
+        // Goal tile can be occupied if it's the same as start tile (unit is already on it)
+        if (goalTile.IsOccupied && goalTile != startTile)
+        {
+            Debug.LogError($"Goal tile is occupied by another object at {goal}");
+            return null;
+        }
+
+        List<Tile> openSet = new List<Tile>();
+        HashSet<Tile> closedSet = new HashSet<Tile>();
+        Dictionary<Tile, (int GCost, int HCost, Tile Parent)> pathData = new Dictionary<Tile, (int, int, Tile)>();
 
         openSet.Add(startTile);
         pathData[startTile] = (0, GetHeuristic(startTile, goalTile), null);  // GCost = 0, HCost = heuristic to goal, no parent yet
 
         while (openSet.Count > 0)
         {
-            // Find the tile with the lowest FCost (GCost + HCost)
             Tile currentTile = openSet[0];
             int lowestFCost = pathData[currentTile].GCost + pathData[currentTile].HCost;
 
@@ -51,8 +66,8 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
 
             if (currentTile == goalTile)
             {
-                // Path found
-                return ReconstructPath(pathData, currentTile);
+                Debug.Log("Path found.");
+                return ReconstructPath(pathData, currentTile);  // Path found
             }
 
             openSet.Remove(currentTile);
@@ -62,12 +77,12 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
             {
                 if (neighbor.IsOccupied && neighbor != goalTile)
                 {
-                    continue; // Skip occupied tiles (except goal)
+                    continue; // Skip occupied tiles unless it's the goal
                 }
 
                 if (closedSet.Contains(neighbor))
                 {
-                    continue; // Ignore tiles already evaluated
+                    continue;
                 }
 
                 int tentativeGCost = pathData[currentTile].GCost + GetDistance(currentTile, neighbor);
@@ -82,13 +97,14 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
                 }
 
                 // Update path data for the neighbor
-                pathData[neighbor] = (tentativeGCost, GetHeuristic(neighbor, goalTile), currentTile);
+                pathData[neighbor] = (tentativeGCost, GetHeuristic(neighbor, goalTile), currentTile);  // Parent is currentTile
             }
         }
 
-        // No path found
-        return null;
+        Debug.LogError("No valid path found.");
+        return null;  // No path found
     }
+
 
     private List<Vector2Int> ReconstructPath(Dictionary<Tile, (int GCost, int HCost, Tile Parent)> pathData, Tile currentTile)
     {
@@ -105,10 +121,8 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         return path;
     }
 
-
     private int GetHeuristic(Tile a, Tile b)
     {
-        // Using Manhattan distance as heuristic
         return Mathf.Abs(a.GridPosition.x - b.GridPosition.x) + Mathf.Abs(a.GridPosition.y - b.GridPosition.y);
     }
 
@@ -123,11 +137,15 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         List<Tile> neighbors = new List<Tile>();
 
         Vector2Int[] directions = {
-            new Vector2Int(1, 0),  // Right
-            new Vector2Int(-1, 0), // Left
-            new Vector2Int(0, 1),  // Up
-            new Vector2Int(0, -1)  // Down
-        };
+        new Vector2Int(1, 0),  // Right
+        new Vector2Int(-1, 0), // Left
+        new Vector2Int(0, 1),  // Up
+        new Vector2Int(0, -1), // Down
+        new Vector2Int(1, 1),  // Up-Right (Diagonal)
+        new Vector2Int(-1, 1), // Up-Left (Diagonal)
+        new Vector2Int(1, -1), // Down-Right (Diagonal)
+        new Vector2Int(-1, -1) // Down-Left (Diagonal)
+    };
 
         foreach (Vector2Int direction in directions)
         {
@@ -144,4 +162,5 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
 
         return neighbors;
     }
+
 }

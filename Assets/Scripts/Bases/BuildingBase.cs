@@ -28,7 +28,7 @@ public abstract class BuildingBase : MonoBehaviour
     protected virtual void Die()
     {
         Debug.Log($"{buildingStats.buildingName} has been Destroyed.");
-        Destroy(gameObject);
+        Destroy(this.gameObject);
     }
 
     public BuildingStats BuildingStats()

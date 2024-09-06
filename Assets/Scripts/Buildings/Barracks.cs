@@ -16,7 +16,7 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 
     void IDamageable.Die()
     {
-        Die();
+        base.Die();
     }
 
     void IClickable.OnLeftClick()

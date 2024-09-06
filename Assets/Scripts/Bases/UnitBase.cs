@@ -9,7 +9,7 @@ public abstract class UnitBase : MonoBehaviour
     public float currentDamage;
     public Material materialForHpBar;
     protected GridManager gridManager;
-    protected Vector2Int currentGridPos;
+    private Vector2Int currentGridPos;
 
     public virtual void Initialize(UnitStats stats)
     {
@@ -49,12 +49,15 @@ public abstract class UnitBase : MonoBehaviour
 
     public void MoveTo(Vector2Int newPosition)
     {
+        currentGridPos = gridManager.WorldPositionToGrid(transform.position);
+        Debug.Log("MYcurrent position :" + currentGridPos);
         StartCoroutine(MoveAlongPath(newPosition));
     }
 
     private IEnumerator MoveAlongPath(Vector2Int targetGridPos)
     {
         List<Vector2Int> path = AStarPathfinder.Instance.FindPath(currentGridPos, targetGridPos);
+        Debug.Log("BOOP");
         if (path == null || path.Count == 0)
         {
             Debug.Log("No valid path found.");

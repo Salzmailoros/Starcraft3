@@ -65,10 +65,11 @@ public class InputManager : MonoBehaviour
                 }
             }
         }
-        if (SelectionManager.Instance.GetSelectedObject() as UnitBase)                          // if selected is a unit and right clicked on is not a damageable target.
+        if (SelectionManager.Instance.GetSelectedObject() as UnitBase && !isLeftClick  )                          // if selected is a unit and right clicked on is not a damageable target.
         {
             var currentSelection = SelectionManager.Instance.GetSelectedObject() as UnitBase;
             var targetpos = GridManager.Instance.WorldPositionToGrid(hit.point);
+            Debug.Log("Targetpos : " + targetpos);
             currentSelection.MoveTo(targetpos);
         }
     }

@@ -5,7 +5,7 @@ public class PowerPlant : BuildingBase, IClickable, IDamageable
     [SerializeField] private BuildingStats PowerPlantStats;
     void IDamageable.Die()
     {
-        Die();
+        base.Die();
     }
 
     void IClickable.OnLeftClick()

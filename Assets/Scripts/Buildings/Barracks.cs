@@ -4,7 +4,7 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 {
     [SerializeField] private BuildingStats barracksStats;
 
-    private void Start()
+    private void Awake()
     {
         Initialize(barracksStats);
         GetComponent<SpriteRenderer>().sortingOrder = 1;
@@ -21,13 +21,13 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 
     void IClickable.OnLeftClick()
     {
-        Debug.Log($" Selected Building of type : {stats.buildingName}");
+        Debug.Log($" Selected Building of type : {buildingStats.buildingName}");
         // update the UI to show this buildings menu/stats/stuff
     }
 
     void IClickable.OnRightClick()
     {
-        Debug.Log($"Targeted Building : {stats.buildingName}");
+        Debug.Log($"Targeted Building : {buildingStats.buildingName}");
     }
 
     void IUnitSpawner.CheckInitialisePool()

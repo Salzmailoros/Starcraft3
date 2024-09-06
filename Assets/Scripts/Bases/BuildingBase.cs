@@ -2,21 +2,24 @@ using UnityEngine;
 
 public abstract class BuildingBase : MonoBehaviour
 {
-    protected BuildingStats stats;
-    public int currentHealth;
+    protected BuildingStats buildingStats;
+    public float currentHealth;
     public Vector2 gridPos;
+    public Material materialForHPBar;
 
     public virtual void Initialize(BuildingStats stats)
     {
-        this.stats = stats;
+        buildingStats = stats;
         GetComponent<SpriteRenderer>().sprite = stats.buildingSprite;
         currentHealth = stats.health;
+        materialForHPBar = GetComponent<SpriteRenderer>().material;
     }
 
-    public virtual void TakeDamage(int damage)
+    public virtual void TakeDamage(float damage)
     {
-        stats.health -= damage;
-        if (stats.health <= 0)
+        currentHealth -= damage;
+        materialForHPBar.SetFloat("_HP",currentHealth/ buildingStats.health);
+        if (buildingStats.health <= 0)
         {
             Die();
         }
@@ -24,12 +27,12 @@ public abstract class BuildingBase : MonoBehaviour
 
     protected virtual void Die()
     {
-        Debug.Log($"{stats.buildingName} has been Destroyed.");
+        Debug.Log($"{buildingStats.buildingName} has been Destroyed.");
         Destroy(gameObject);
     }
 
     public BuildingStats BuildingStats()
     {
-        return stats;
+        return buildingStats;
     }
 }

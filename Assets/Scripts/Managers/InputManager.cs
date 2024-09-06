@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 public class InputManager : MonoBehaviour
 {
@@ -47,9 +48,28 @@ public class InputManager : MonoBehaviour
                 }
                 else                  //rigtclick on clickable unit logic
                 {
+                    if (SelectionManager.Instance.GetSelectedObject() is UnitBase)
+                    {
+                        var currentSelection = SelectionManager.Instance.GetSelectedObject() as UnitBase;
+
+                        if (clickable is IDamageable)     // if selected is a damage dealer and right clicked on a damageable target.
+                        {
+                            var target = clickable as IDamageable;
+                            currentSelection.DealDamage(target);
+                        }
+                        
+                                                      
+                       
+                    }
                     clickable.OnRightClick();
                 }
             }
+        }
+        if (SelectionManager.Instance.GetSelectedObject() as UnitBase)                          // if selected is a unit and right clicked on is not a damageable target.
+        {
+            var currentSelection = SelectionManager.Instance.GetSelectedObject() as UnitBase;
+            var targetpos = GridManager.Instance.WorldPositionToGrid(hit.point);
+            currentSelection.MoveTo(targetpos);
         }
     }
 }

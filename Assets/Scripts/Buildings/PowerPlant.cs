@@ -10,16 +10,16 @@ public class PowerPlant : BuildingBase, IClickable, IDamageable
 
     void IClickable.OnLeftClick()
     {
-        Debug.Log($" Selected Building of type : {stats.buildingName}");
+        Debug.Log($" Selected Building of type : {buildingStats.buildingName}");
         // update the UI to show this buildings menu/stats/stuff
     }
 
     void IClickable.OnRightClick()
     {
-        Debug.Log($"Targeted Building : {stats.buildingName}");
+        Debug.Log($"Targeted Building : {buildingStats.buildingName}");
     }
 
-    private void Start()
+    private void Awake()
     {
         Initialize(PowerPlantStats);
         GetComponent<SpriteRenderer>().sortingOrder = 1;

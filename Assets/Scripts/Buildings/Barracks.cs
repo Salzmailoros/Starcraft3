@@ -4,6 +4,10 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 {
     [SerializeField] private BuildingStats barracksStats;
 
+    public int TeamID = 0;
+
+    int IDamageable.TeamID { get => TeamID; set => TeamID = value; }
+
     private void Awake()
     {
         Initialize(barracksStats);

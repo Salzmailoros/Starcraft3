@@ -52,24 +52,24 @@ public class InputManager : MonoBehaviour
                     {
                         var currentSelection = SelectionManager.Instance.GetSelectedObject() as UnitBase;
 
-                        if (clickable is IDamageable)     // if selected is a damage dealer and right clicked on a damageable target.
+                        if (clickable is IDamageable)     // if selected is a damage dealer and right clicked on a damageable target.   damage
                         {
                             var target = clickable as IDamageable;
-                            currentSelection.DealDamage(target);
+                            currentSelection.isCommandOverride = true;
+                            currentSelection.Attack(target);
                         }
-                        
-                                                      
-                       
                     }
                     clickable.OnRightClick();
                 }
             }
         }
-        if (SelectionManager.Instance.GetSelectedObject() as UnitBase && !isLeftClick  )                          // if selected is a unit and right clicked on is not a damageable target.
+        if (SelectionManager.Instance.GetSelectedObject() as UnitBase && !isLeftClick && hit.collider == null )                          // if selected is a unit and right clicked on is not a damageable target. moveto
         {
+
             var currentSelection = SelectionManager.Instance.GetSelectedObject() as UnitBase;
-            var targetpos = GridManager.Instance.WorldPositionToGrid(hit.point);
+            var targetpos = GridManager.Instance.WorldPositionToGrid(Camera.main.ScreenToWorldPoint(Input.mousePosition));
             Debug.Log("Targetpos : " + targetpos);
+            currentSelection.isCommandOverride = true;
             currentSelection.MoveTo(targetpos);
         }
     }

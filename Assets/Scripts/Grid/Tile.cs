@@ -14,8 +14,16 @@ public class Tile
 
     public void SetOccupied(GameObject occupant)
     {
-        IsOccupied = true;
-        OccupyingObject = occupant;
+        if (occupant == null)
+        {
+            IsOccupied = false;
+            OccupyingObject = null;
+        }
+        else
+        {
+            IsOccupied = true;
+            OccupyingObject = occupant;
+        }
     }
 
     public void ClearOccupancy()

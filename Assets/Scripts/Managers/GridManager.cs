@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridManager : Singleton<GridManager>
@@ -32,6 +33,8 @@ public class GridManager : Singleton<GridManager>
                 _grid[x, y].ClearOccupancy();
             }
         }
+        GridVisualiser visualiser = FindObjectOfType<GridVisualiser>();
+        visualiser.Visualise(_grid);
     }
 
     //--------------- GRID GENERATION UP TO HERE ---------------\\
@@ -39,11 +42,9 @@ public class GridManager : Singleton<GridManager>
     //--------------- GRID FUNCTIONS FROM HERE ON ---------------\\
     public Tile GetTile(Vector2Int gridPosition)
     {
-        if (IsValidGridPosition(gridPosition))
-        {
-            return _grid[gridPosition.x, gridPosition.y];
-        }
-        return null;
+        if (gridPosition.x < 0 || gridPosition.x > gridWidth - 1 || gridPosition.y < 0 || gridPosition.y > gridHeight - 1)
+            return null;       // if out of bounds return null
+        return _grid[gridPosition.x, gridPosition.y];
     }
 
     public Vector2Int WorldPositionToGrid(Vector2 worldPosition)
@@ -64,14 +65,30 @@ public class GridManager : Singleton<GridManager>
 
     public bool IsValidGridPosition(Vector2Int gridPosition)
     {
-        if (gridPosition.x < 0 || gridPosition.x > gridWidth-1 || gridPosition.y < 0 || gridPosition.y > gridHeight-1)
+        if (gridPosition.x < 0 || gridPosition.x > gridWidth - 1 || gridPosition.y < 0 || gridPosition.y > gridHeight - 1)
             return false;       // if out of bounds return false
         else
-        return !_grid[gridPosition.x, gridPosition.y].IsOccupied;
+        return !_grid[gridPosition.x, gridPosition.y].IsOccupied;   //return false if occupied.
     }
 
     public void SetTile(Vector2Int gridPosition,GameObject occuppant)
     {
         _grid[gridPosition.x,gridPosition.y].SetOccupied(occuppant);
+    }
+
+    public Tile ReturnClosestEmptyTile(Vector2Int tilePos)
+    {
+        Tile closestTile = _grid[0,0];
+        foreach (var tile in _grid)
+        {
+            if (tile.IsOccupied) continue;
+            if (Vector2.Distance (closestTile.GridPosition,tilePos)  <= Vector2.Distance(tile.GridPosition, tilePos))
+            {
+                Debug.Log("Nearest empty tile is this far away :"+Vector2.Distance(closestTile.GridPosition, tilePos));
+                closestTile = tile;
+            }
+            
+        }
+        return closestTile;
     }
 }

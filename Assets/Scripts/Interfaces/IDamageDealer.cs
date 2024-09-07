@@ -1,4 +1,4 @@
 public interface IDamageDealer
 {
-    void DealDamage(IDamageable damTarget); //triggers Idamageable
+    void Attack(IDamageable damTarget); //triggers Idamageable
 }

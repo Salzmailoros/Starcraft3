@@ -3,6 +3,11 @@ using UnityEngine;
 public class PowerPlant : BuildingBase, IClickable, IDamageable
 {
     [SerializeField] private BuildingStats PowerPlantStats;
+
+    public int TeamID = 0;
+
+    int IDamageable.TeamID { get => TeamID; set => TeamID = value; }
+
     void IDamageable.Die()
     {
         base.Die();

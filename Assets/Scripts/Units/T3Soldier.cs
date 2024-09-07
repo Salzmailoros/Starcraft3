@@ -4,6 +4,9 @@ public class T3Soldier : UnitBase, IClickable, IDamageable, IDamageDealer
 {
     [SerializeField] private UnitStats T3SoldierStats;
 
+    public int TeamID = 0;
+
+    int IDamageable.TeamID { get => TeamID; set => TeamID = value; }
     public void OnLeftClick()
     {
         SelectionManager.Instance.SelectUnit(this);
@@ -21,6 +24,5 @@ public class T3Soldier : UnitBase, IClickable, IDamageable, IDamageDealer
     public override void Die()
     {
         base.Die();
-        Debug.Log($" {this.name} has been destroyed.");
     }
 }

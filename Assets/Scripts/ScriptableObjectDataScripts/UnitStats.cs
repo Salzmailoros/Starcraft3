@@ -10,7 +10,8 @@ public class UnitStats : ScriptableObject
     public Vector2Int size;  
     public Sprite unitSprite;
     public Sprite uiSprite;
-
+    public float range;
+    public float attackSpeed;
 
 
     public GameObject unitPrefab;

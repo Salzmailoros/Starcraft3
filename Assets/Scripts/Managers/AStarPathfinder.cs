@@ -16,76 +16,47 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         Tile startTile = gridManager.GetTile(start);
         Tile goalTile = gridManager.GetTile(goal);
 
-        // Debugging
-        Debug.Log($"Start Tile: {start}, Goal Tile: {goal}");
-        Debug.Log($"StartTile is Occupied: {startTile.IsOccupied}, GoalTile is Occupied: {goalTile.IsOccupied}");
-
-        // Ignore the start tile's occupancy since the unit is already there
-        if (startTile == null)
+        // Check if start and goal are valid tiles
+        if (startTile == null || goalTile == null)
         {
-            Debug.LogError($"Start tile is null at position {start}");
+            Debug.LogError("Invalid start or goal tile!");
             return null;
         }
 
-        if (goalTile == null)
+        // Allow moving to the goal even if occupied by an enemy
+        // If the goal is occupied, move to the nearest free tile
+        if (goalTile.IsOccupied && goalTile != gridManager.GetTile(gridManager.WorldPositionToGrid(this.transform.position)))
         {
-            Debug.LogError($"Goal tile is null at position {goal}");
-            return null;
+            Debug.Log("Goal tile is occupied, moving to closest tile.");
+            return FindClosestFreeTile(goalTile);
         }
 
-        // Goal tile can be occupied if it's the same as start tile (unit is already on it)
-        if (goalTile.IsOccupied && goalTile != startTile)
-        {
-            Debug.LogError($"Goal tile is occupied by another object at {goal}");
-            return null;
-        }
-
-        List<Tile> openSet = new List<Tile>();
+        List<Tile> openSet = new List<Tile> { startTile };
         HashSet<Tile> closedSet = new HashSet<Tile>();
-        Dictionary<Tile, (int GCost, int HCost, Tile Parent)> pathData = new Dictionary<Tile, (int, int, Tile)>();
-
-        openSet.Add(startTile);
-        pathData[startTile] = (0, GetHeuristic(startTile, goalTile), null);  // GCost = 0, HCost = heuristic to goal, no parent yet
+        Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData = new Dictionary<Tile, (float, float, Tile)>
+        {
+            [startTile] = (0f, GetDistance(startTile, goalTile), null)
+        };
 
         while (openSet.Count > 0)
         {
-            Tile currentTile = openSet[0];
-            int lowestFCost = pathData[currentTile].GCost + pathData[currentTile].HCost;
-
-            foreach (Tile tile in openSet)
-            {
-                var tileData = pathData[tile];
-                int fCost = tileData.GCost + tileData.HCost;
-
-                if (fCost < lowestFCost || (fCost == lowestFCost && tileData.HCost < pathData[currentTile].HCost))
-                {
-                    currentTile = tile;
-                    lowestFCost = fCost;
-                }
-            }
+            Tile currentTile = GetTileWithLowestFCost(openSet, pathData);
 
             if (currentTile == goalTile)
             {
-                Debug.Log("Path found.");
-                return ReconstructPath(pathData, currentTile);  // Path found
+                Debug.Log("Path found!");
+                return ReconstructPath(pathData, goalTile);
             }
 
             openSet.Remove(currentTile);
             closedSet.Add(currentTile);
 
-            foreach (Tile neighbor in GetNeighbors(currentTile))
+            foreach (Tile neighbor in GetNeighbours(currentTile))  // Only cardinal neighbors
             {
-                if (neighbor.IsOccupied && neighbor != goalTile)
-                {
-                    continue; // Skip occupied tiles unless it's the goal
-                }
-
-                if (closedSet.Contains(neighbor))
-                {
+                if (closedSet.Contains(neighbor) || (neighbor.IsOccupied && neighbor != goalTile))
                     continue;
-                }
 
-                int tentativeGCost = pathData[currentTile].GCost + GetDistance(currentTile, neighbor);
+                float tentativeGCost = pathData[currentTile].GCost + GetDistance(currentTile, neighbor);
 
                 if (!openSet.Contains(neighbor))
                 {
@@ -93,46 +64,27 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
                 }
                 else if (tentativeGCost >= pathData[neighbor].GCost)
                 {
-                    continue; // This path is not better
+                    continue;
                 }
 
-                // Update path data for the neighbor
-                pathData[neighbor] = (tentativeGCost, GetHeuristic(neighbor, goalTile), currentTile);  // Parent is currentTile
+                pathData[neighbor] = (tentativeGCost, GetDistance(neighbor, goalTile), currentTile);
             }
         }
 
         Debug.LogError("No valid path found.");
-        return null;  // No path found
+        return null;
     }
 
-
-    private List<Vector2Int> ReconstructPath(Dictionary<Tile, (int GCost, int HCost, Tile Parent)> pathData, Tile currentTile)
+    private List<Vector2Int> FindClosestFreeTile(Tile goalTile)
     {
-        List<Vector2Int> path = new List<Vector2Int>();
-        path.Add(currentTile.GridPosition);
+        List<Vector2Int> closestTiles = new List<Vector2Int>();
 
-        while (pathData[currentTile].Parent != null)
-        {
-            currentTile = pathData[currentTile].Parent;
-            path.Add(currentTile.GridPosition);
-        }
 
-        path.Reverse();
-        return path;
+
+        return closestTiles;
     }
 
-    private int GetHeuristic(Tile a, Tile b)
-    {
-        return Mathf.Abs(a.GridPosition.x - b.GridPosition.x) + Mathf.Abs(a.GridPosition.y - b.GridPosition.y);
-    }
-
-    private int GetDistance(Tile a, Tile b)
-    {
-        // Assuming uniform cost between adjacent tiles
-        return 1;
-    }
-
-    private List<Tile> GetNeighbors(Tile tile)
+    private List<Tile> GetNeighbours(Tile tile)
     {
         List<Tile> neighbors = new List<Tile>();
 
@@ -140,11 +92,7 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         new Vector2Int(1, 0),  // Right
         new Vector2Int(-1, 0), // Left
         new Vector2Int(0, 1),  // Up
-        new Vector2Int(0, -1), // Down
-        new Vector2Int(1, 1),  // Up-Right (Diagonal)
-        new Vector2Int(-1, 1), // Up-Left (Diagonal)
-        new Vector2Int(1, -1), // Down-Right (Diagonal)
-        new Vector2Int(-1, -1) // Down-Left (Diagonal)
+        new Vector2Int(0, -1)  // Down
     };
 
         foreach (Vector2Int direction in directions)
@@ -161,6 +109,49 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         }
 
         return neighbors;
+    }
+
+
+    private List<Vector2Int> ReconstructPath(Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData, Tile goalTile)
+    {
+        List<Vector2Int> path = new List<Vector2Int> { goalTile.GridPosition };
+
+        Tile currentTile = goalTile;
+        while (pathData[currentTile].Parent != null)
+        {
+            currentTile = pathData[currentTile].Parent;
+            path.Add(currentTile.GridPosition);
+        }
+
+        path.Reverse(); // Reverse to get the path from start to goal
+        return path;
+    }
+
+
+
+    private Tile GetTileWithLowestFCost(List<Tile> openSet, Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData)
+    {
+        Tile lowestTile = openSet[0];
+        float lowestFCost = pathData[lowestTile].GCost + pathData[lowestTile].HCost;
+
+        foreach (Tile tile in openSet)
+        {
+            float fCost = pathData[tile].GCost + pathData[tile].HCost;
+            if (fCost < lowestFCost || (fCost == lowestFCost && pathData[tile].HCost < pathData[lowestTile].HCost))
+            {
+                lowestTile = tile;
+                lowestFCost = fCost;
+            }
+        }
+
+        return lowestTile;
+    }
+
+    private float GetDistance(Tile a, Tile b)
+    {
+        float dx = Mathf.Abs(a.GridPosition.x - b.GridPosition.x);
+        float dy = Mathf.Abs(a.GridPosition.y - b.GridPosition.y);
+        return Mathf.Sqrt(dx * dx + dy * dy);
     }
 
 }

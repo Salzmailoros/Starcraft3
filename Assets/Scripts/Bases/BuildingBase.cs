@@ -4,7 +4,7 @@ public abstract class BuildingBase : MonoBehaviour
 {
     protected BuildingStats buildingStats;
     public float currentHealth;
-    public Vector2 gridPos;
+    public Vector2Int gridPos;
     public Material materialForHPBar;
 
     public virtual void Initialize(BuildingStats stats)
@@ -27,7 +27,8 @@ public abstract class BuildingBase : MonoBehaviour
 
     protected virtual void Die()
     {
-        Debug.Log($"{buildingStats.buildingName} has been Destroyed.");
+        GridManager.Instance.SetTile(gridPos, null);
+
         Destroy(this.gameObject);
     }
 

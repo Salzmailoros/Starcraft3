@@ -13,6 +13,13 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
 
     public List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal)
     {
+        // If the start and goal are the same, return an empty path (no movement needed)
+        if (start == goal)
+        {
+            Debug.Log("Start and goal positions are the same. No movement required.");
+            return new List<Vector2Int>();  // Return an empty path
+        }
+
         Tile startTile = gridManager.GetTile(start);
         Tile goalTile = gridManager.GetTile(goal);
 
@@ -62,9 +69,9 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
             }
         }
 
-        Debug.LogError("No valid path found.");
         return null;
     }
+
 
     // Get the valid cardinal neighbors of the tile (No diagonals)
     private List<Tile> GetCardinalNeighbours(Tile tile)

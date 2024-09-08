@@ -30,7 +30,7 @@ public class SpawnManager : Singleton<SpawnManager>
         Debug.LogWarning("PoolReturnedNull - Max objects for pool reached or pool isnt working properly");
         return null;
     }
-    public GameObject SpawnSoldierFromPool(string poolKey, Vector2 gridPos, Vector2 buildingSize)
+    public GameObject SpawnSoldierFromPool(string poolKey, Vector2 gridPos, Vector2 buildingSize, int teamid)
     {
         var PosToSpawnAtGrid = getSpawnableAreaForSelected(gridPos, buildingSize);
 
@@ -42,6 +42,7 @@ public class SpawnManager : Singleton<SpawnManager>
        
         var PosToSpawnAtInWorld = GridManager.Instance.GridToWorldPosition(PosToSpawnAtGrid);
         GameObject obj = PoolManager.Instance.GetObjectFromPool(poolKey);
+        obj.GetComponent<IDamageable>().TeamID = teamid;
         // fill grid position 
         GridManager.Instance.SetTile(PosToSpawnAtGrid, obj);
         // pull object from pool and place in world

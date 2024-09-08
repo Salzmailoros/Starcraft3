@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
 
 public class InputManager : MonoBehaviour
 {
@@ -37,7 +36,6 @@ public class InputManager : MonoBehaviour
     private void RaycastToClickable(bool isLeftClick)
     {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
         if (hit.collider != null)
         {
             IClickable clickable = hit.collider.GetComponent<IClickable>();
@@ -72,7 +70,6 @@ public class InputManager : MonoBehaviour
                 var target = clickable as IDamageable;
 
                 // Reset current command and attack the new target
-                currentSelection.isCommandOverride = true;
                 currentSelection.Attack(target);  // Attack command
             }
 
@@ -89,8 +86,6 @@ public class InputManager : MonoBehaviour
             var targetPos = GridManager.Instance.WorldPositionToGrid(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
             Debug.Log("Target position: " + targetPos);
-
-            currentSelection.isCommandOverride = true;  // Override current command
             currentSelection.MoveTo(targetPos);  // Issue movement command
         }
     }

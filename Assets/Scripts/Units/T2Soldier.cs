@@ -21,9 +21,4 @@ public class T2Soldier : UnitBase, IClickable, IDamageable, IDamageDealer
     {
         Initialize(T2SoldierStats);
     }
-    public override void Die()
-    {
-        base.Die();
-        Debug.Log($" {this.name} has been destroyed.");
-    }
 }

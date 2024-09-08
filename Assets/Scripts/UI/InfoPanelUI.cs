@@ -1,8 +1,8 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+
+// Removed: using static UnityEditor.Progress;
 
 public class InfoPanelUI : MonoBehaviour
 {
@@ -29,7 +29,7 @@ public class InfoPanelUI : MonoBehaviour
     {
         if (currentSelectedObject != null)
         {
-            UpdateHealth(); 
+            UpdateHealth();
         }
     }
 
@@ -52,7 +52,6 @@ public class InfoPanelUI : MonoBehaviour
         }
     }
 
-
     private void UpdateStaticUI()
     {
         if (currentSelectedObject is UnitBase unit)
@@ -60,7 +59,7 @@ public class InfoPanelUI : MonoBehaviour
             UnitStats stats = unit.ReturnInfoPanelInfo();
             selectionInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
-            unitMaxHP = stats.health ;
+            unitMaxHP = stats.health;
             handleSpawnableContent(null);
         }
         else if (currentSelectedObject is BuildingBase building)
@@ -69,13 +68,13 @@ public class InfoPanelUI : MonoBehaviour
             selectionInfoText.text = stats.name;
             unitImage.sprite = stats.uiSprite;
             unitMaxHP = stats.health;
-            if (building.GetComponent<IUnitSpawner>()!= null)         // if building has Iobjectspawner on
+            if (building.GetComponent<IUnitSpawner>() != null) // if building has Iobjectspawner on
             {
                 handleSpawnableContent(stats);
             }
             else
             {
-                handleSpawnableContent(null);                           //if building is not objectspawner
+                handleSpawnableContent(null); // if building is not objectspawner
             }
         }
         else
@@ -85,8 +84,6 @@ public class InfoPanelUI : MonoBehaviour
             selectionHPText.text = " ";
             handleSpawnableContent(null);
         }
-
-
     }
 
     private void handleSpawnableContent(BuildingStats stats)
@@ -131,16 +128,15 @@ public class InfoPanelUI : MonoBehaviour
         return newButton;
     }
 
-
     private void UpdateHealth()
     {
         if (currentSelectedObject is UnitBase unit)
         {
-            selectionHPText.text = "Hp :" + unit.currentHealth.ToString() + " / " + unitMaxHP;
+            selectionHPText.text = "Hp: " + unit.currentHealth.ToString() + " / " + unitMaxHP;
         }
         else if (currentSelectedObject is BuildingBase building)
         {
-            selectionHPText.text = "Hp :" + building.currentHealth.ToString() + " / " + unitMaxHP;
+            selectionHPText.text = "Hp: " + building.currentHealth.ToString() + " / " + unitMaxHP;
         }
         else
         {

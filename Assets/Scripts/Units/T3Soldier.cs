@@ -21,8 +21,4 @@ public class T3Soldier : UnitBase, IClickable, IDamageable, IDamageDealer
     {
         Initialize(T3SoldierStats);
     }
-    public override void Die()
-    {
-        base.Die();
-    }
 }

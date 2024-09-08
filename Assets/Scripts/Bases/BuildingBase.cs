@@ -18,8 +18,9 @@ public abstract class BuildingBase : MonoBehaviour
     public virtual void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        materialForHPBar.SetFloat("_HP",currentHealth/ buildingStats.health);
-        if (buildingStats.health <= 0)
+        materialForHPBar.SetFloat("_HP", currentHealth / buildingStats.health);  // Update HP bar based on current health
+
+        if (currentHealth <= 0)  // Check current health, not the max health
         {
             Die();
         }
@@ -28,7 +29,7 @@ public abstract class BuildingBase : MonoBehaviour
     protected virtual void Die()
     {
         GridManager.Instance.SetTile(gridPos, null);
-
+        Debug.Log("I died" + this.name);
         Destroy(this.gameObject);
     }
 

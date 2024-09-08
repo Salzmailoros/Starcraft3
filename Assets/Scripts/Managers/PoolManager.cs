@@ -44,11 +44,6 @@ public class PoolManager : Singleton<PoolManager>
         {
             pool.ReturnToPool(obj);
         }
-        else
-        {
-            Debug.LogWarning($"Pool with key '{poolKey}' not found.");
-            Destroy(obj);
-        }
     }
 
     public bool DoesPoolExist(string poolKey)

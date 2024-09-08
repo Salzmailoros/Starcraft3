@@ -25,13 +25,12 @@ public class Barracks : BuildingBase, IClickable, IDamageable, IUnitSpawner
 
     void IClickable.OnLeftClick()
     {
-        Debug.Log($" Selected Building of type : {buildingStats.buildingName}");
-        // update the UI to show this buildings menu/stats/stuff
+        //Debug.Log($" Selected Building of type : {buildingStats.buildingName}");
     }
 
     void IClickable.OnRightClick()
     {
-        Debug.Log($"Targeted Building : {buildingStats.buildingName}");
+        //Debug.Log($"Targeted Building : {buildingStats.buildingName}");
     }
 
     void IUnitSpawner.CheckInitialisePool()

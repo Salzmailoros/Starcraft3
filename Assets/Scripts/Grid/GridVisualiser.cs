@@ -16,6 +16,7 @@ public class GridVisualiser : MonoBehaviour
                 Instantiate(gridprefab, new Vector3(GridManager.Instance.GridToWorldPosition(tile.GridPosition).x, GridManager.Instance.GridToWorldPosition(tile.GridPosition).y, 0), Quaternion.identity, transform);
             }
         }
+        FindObjectOfType<LevelPlacer>().SpawnStuff();
        
     }
 

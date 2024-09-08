@@ -22,9 +22,4 @@ public class T1Soldier : UnitBase, IClickable, IDamageable, IDamageDealer
         Debug.Log("TARGETED ME :" + name);
     }
 
-    public override void Die()
-    {
-        base.Die();
-        Debug.Log($" {this.name} has been destroyed.");
-    }
 }

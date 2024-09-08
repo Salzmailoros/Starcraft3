@@ -9,16 +9,14 @@ public abstract class UnitBase : MonoBehaviour
     public float currentDamage;
     private IDamageable currentTarget = null;
     private bool isMoving = false;
-    private Coroutine moveCoroutine;
+    private Coroutine moveCoroutine;  // Keep track of the movement coroutine
     private float lastAttackTime = 0f;
-    public bool isCommandOverride = false; // Prevents unnecessary target reset
-    private bool hasNewCommand = false; // Detects new commands
+    private bool hasNewCommand = false;
 
     protected GridManager gridManager;
     private Vector2Int currentGridPos;
-
     private Material materialForHPBar;
-    private IDamageable myDamageableComponent;  // This unit's IDamageable component
+    private IDamageable myDamageableComponent;
 
     public virtual void Initialize(UnitStats stats)
     {
@@ -30,8 +28,6 @@ public abstract class UnitBase : MonoBehaviour
         gridManager = GridManager.Instance;
         materialForHPBar = GetComponent<SpriteRenderer>().material;
         currentGridPos = gridManager.WorldPositionToGrid(transform.position);
-
-        // Cache this unit's IDamageable component
         myDamageableComponent = GetComponent<IDamageable>();
     }
 
@@ -47,10 +43,10 @@ public abstract class UnitBase : MonoBehaviour
 
     public virtual void Die()
     {
+        //Debug.Log("Returned to " + stats.name + " pool");
         PoolManager.Instance.ReturnObjectToPool(stats.name, gameObject);
-        gridManager.SetTile(currentGridPos, null); // Free the tile upon death
-        Debug.Log("Returned me to :" + stats.name + " pool");
-        Destroy(gameObject);
+        gridManager.SetTile(currentGridPos, null);
+        currentHealth = stats.health;
     }
 
     private void Update()
@@ -60,84 +56,120 @@ public abstract class UnitBase : MonoBehaviour
             MonoBehaviour target = currentTarget as MonoBehaviour;
             if (target == null)
             {
+                //Debug.LogWarning("Target is null, resetting.");
                 ResetTarget();
                 return;
             }
 
             float distance = Vector3.Distance(transform.position, target.transform.position);
-
-            // Check if target is within attack range
             if (distance <= stats.range)
             {
-                // Stop moving when within range
                 isMoving = false;
-
-                // Check if the target is on the same team
                 if (myDamageableComponent != null && currentTarget.TeamID != myDamageableComponent.TeamID)
                 {
-                    // Attack if attack cooldown has passed
                     if (Time.time >= lastAttackTime + (1 / stats.attackSpeed))
                     {
                         lastAttackTime = Time.time;
                         currentTarget.TakeDamage(currentDamage);
-                        Debug.Log("BOOP");
+                        //Debug.Log("Attacking target.");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("Target is on the same team, cannot attack.");
+                    Debug.LogWarning("Target is friendly. Cannot attack.");
                 }
             }
-            else if (!isMoving && !hasNewCommand)  // If not moving, move toward the target if out of range
+            else if (!isMoving && !hasNewCommand)
             {
-                StartCoroutine(MoveAlongPath(gridManager.WorldPositionToGrid(target.transform.position)));  // Corrected here
+                StartMovingTowardsTarget(gridManager.WorldPositionToGrid(target.transform.position));
             }
         }
     }
 
     public void Attack(IDamageable damageableTarget)
     {
-        hasNewCommand = true;  // Flag for new command
+        hasNewCommand = true;
 
-        if (currentTarget != damageableTarget)
+        // Stop current movement coroutine if it's still running
+        if (moveCoroutine != null)
         {
-            ResetTarget();  // Reset current actions before switching targets
+            StopCoroutine(moveCoroutine);
+            isMoving = false;
+            moveCoroutine = null;
+        }
+
+        if (currentTarget != damageableTarget) ResetTarget();
+
+        if (damageableTarget == myDamageableComponent)
+        {
+            Debug.LogWarning("Cannot attack self");
+            ResetTarget();
+            return;
         }
 
         currentTarget = damageableTarget;
+        MonoBehaviour target = currentTarget as MonoBehaviour;
 
-        // Check if the target is not on the same team
-        if (myDamageableComponent != null && currentTarget.TeamID != myDamageableComponent.TeamID)
+        if (target != null)
         {
-            MonoBehaviour target = currentTarget as MonoBehaviour;
-            if (target != null)
+            Vector2Int targetGridPos = gridManager.WorldPositionToGrid(target.transform.position);
+            if (myDamageableComponent != null && currentTarget.TeamID == myDamageableComponent.TeamID)
             {
-                Vector2Int targetGridPos = gridManager.WorldPositionToGrid(target.transform.position);
-                StartCoroutine(MoveAlongPath(targetGridPos));  // Correct movement
+                Debug.LogWarning("Friendly target. Resetting.");
+                ResetTarget();
+            }
+            else
+            {
+                //Debug.Log("Target is an enemy. Moving to engage.");
+                StartMovingTowardsTarget(targetGridPos);
             }
         }
-        else
+
+        hasNewCommand = false;
+    }
+
+    // New method to handle movement towards target
+    private void StartMovingTowardsTarget(Vector2Int goalPosition)
+    {
+        // Stop any existing movement before starting a new one
+        if (moveCoroutine != null)
         {
-            Debug.LogWarning("Cannot attack a target on the same team.");
-            currentTarget = null; // Clear target if on the same team
+            StopCoroutine(moveCoroutine);
         }
 
-        hasNewCommand = false;  // New command is handled
+        // Start new movement coroutine
+        moveCoroutine = StartCoroutine(MoveAlongPath(goalPosition));
     }
 
     private IEnumerator MoveAlongPath(Vector2Int goalPosition)
     {
-        // Free the old tile before starting movement
+        if (currentGridPos == goalPosition)
+        {
+            Debug.Log("Already at the target position, no movement needed.");
+            yield break;
+        }
+
         gridManager.SetTile(currentGridPos, null);
         currentGridPos = gridManager.WorldPositionToGrid(transform.position);
-
         List<Vector2Int> path = AStarPathfinder.Instance.FindPath(currentGridPos, goalPosition);
 
         if (path == null || path.Count == 0)
         {
-            Debug.LogWarning("No valid path found!");
-            ResetTarget();  // If no valid path, reset target
-            yield break;
+            Debug.LogWarning("No valid path to target, moving to closest available position.");
+            Tile closestTile = gridManager.ReturnClosestEmptyTile(goalPosition);
+            if (closestTile != null)
+            {
+                goalPosition = closestTile.GridPosition;
+                path = AStarPathfinder.Instance.FindPath(currentGridPos, goalPosition);
+            }
+
+            if (path == null || path.Count == 0)
+            {
+                Debug.LogError("No valid path to target or nearest available position.");
+                gridManager.SetTile(currentGridPos, gameObject);
+                ResetTarget();
+                yield break;
+            }
         }
 
         isMoving = true;
@@ -145,14 +177,36 @@ public abstract class UnitBase : MonoBehaviour
 
         foreach (Vector2Int nextStep in path)
         {
+            Tile nextTile = gridManager.GetTile(nextStep);
+            if (nextTile.IsOccupied)
+            {
+                Debug.LogWarning($"Next tile at {nextStep} is occupied, recalculating path.");
+                Tile closestTile = gridManager.ReturnClosestEmptyTile(goalPosition);
+                if (closestTile != null)
+                {
+                    goalPosition = closestTile.GridPosition;
+                    path = AStarPathfinder.Instance.FindPath(currentGridPos, goalPosition);
+                }
+
+                if (path == null || path.Count == 0)
+                {
+                    Debug.LogError("No valid path found after recalculating.");
+                    gridManager.SetTile(currentGridPos, gameObject);
+                    ResetTarget();
+                    yield break;
+                }
+
+                continue;
+            }
+
             Vector3 targetPos = gridManager.GridToWorldPosition(nextStep);
 
             // Move towards the next tile
             while (Vector3.Distance(transform.position, targetPos) > 0.01f)
             {
-                if (hasNewCommand)  // Interrupt movement if a new command is issued
+                if (hasNewCommand)
                 {
-                    // Ensure the tile is occupied even if movement is interrupted
+                    Debug.LogWarning("Movement interrupted by new command.");
                     gridManager.SetTile(currentGridPos, gameObject);
                     isMoving = false;
                     yield break;
@@ -163,26 +217,24 @@ public abstract class UnitBase : MonoBehaviour
             }
 
             // Occupy the new tile after completing the step
-            gridManager.SetTile(currentGridPos, null); // Free old tile
-            gridManager.SetTile(nextStep, gameObject); // Occupy new tile
+            if (gridManager.GetTile(currentGridPos).OccupyingObject == gameObject)
+            {
+                gridManager.SetTile(currentGridPos, null);
+            }
+            gridManager.SetTile(nextStep, gameObject);
             currentGridPos = nextStep;
 
-            // Check if the target is now within range after the step
-            if (target != null)
+            // Now check if the target is within range after completing the step
+            if (target != null && Vector3.Distance(transform.position, target.transform.position) <= stats.range)
             {
-                float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
-                if (distanceToTarget <= stats.range)
-                {
-                    Debug.Log("Reached target tile, ready to attack.");
-                    isMoving = false;
-                    yield break;  // Stop moving, start attacking
-                }
+                Debug.Log("Reached target tile, ready to attack.");
+                isMoving = false;
+                yield break;
             }
         }
 
         isMoving = false;
 
-        // After completing the path, reset the target if still out of range
         if (currentTarget != null && Vector3.Distance(transform.position, (currentTarget as MonoBehaviour).transform.position) > stats.range)
         {
             Debug.Log("Target too far to walk to or attack.");
@@ -190,29 +242,28 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
 
+
     private void ResetTarget()
     {
-        if (moveCoroutine != null) StopCoroutine(moveCoroutine);  // Stop any movement
-        gridManager.SetTile(currentGridPos, gameObject);  // Ensure tile occupation is updated
+        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
+        Debug.Log("Resetting target.");
+        gridManager.SetTile(currentGridPos, gameObject);
         currentTarget = null;
         isMoving = false;
-        isCommandOverride = false;  // Reset command override flag
-        hasNewCommand = false;  // Reset new command flag
+        hasNewCommand = false;
+    }
+
+    public void MoveTo(Vector2Int newPosition)
+    {
+        if (currentGridPos == newPosition) return;
+        hasNewCommand = true;
+        ResetTarget();
+        StartMovingTowardsTarget(newPosition);
+        hasNewCommand = false;
     }
 
     public UnitStats ReturnInfoPanelInfo()
     {
         return stats;
     }
-    public void MoveTo(Vector2Int newPosition)
-    {
-        hasNewCommand = true;  // Mark new command
-        ResetTarget();  // Stop any current action and reset target
-
-        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
-        moveCoroutine = StartCoroutine(MoveAlongPath(newPosition));  // Start moving to the new position
-
-        hasNewCommand = false;  // Command has been handled
-    }
-
 }

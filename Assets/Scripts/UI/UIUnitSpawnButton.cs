@@ -21,8 +21,9 @@ public class UIUnitSpawnButton : MonoBehaviour
 
         BuildingBase currentBuilding = SelectionManager.Instance.GetSelectedObject() as BuildingBase;
         if (currentBuilding == null) { Debug.LogWarning("non building trying to spawn a unit"); return; };
+        IDamageable currentbuildingTeamGetInfo = SelectionManager.Instance.GetSelectedObject() as IDamageable;
 
-        SpawnManager.Instance.SpawnSoldierFromPool(unitStats.name, currentBuilding.gridPos, currentBuilding.BuildingStats().size);
+        SpawnManager.Instance.SpawnSoldierFromPool(unitStats.name, currentBuilding.gridPos, currentBuilding.BuildingStats().size,currentbuildingTeamGetInfo.TeamID);
         
     }
 

@@ -110,8 +110,8 @@ public class BuildingPlacementManager : MonoBehaviour
     private Vector2 FindBuildingBottomLeftCorner()
     {
         var bottomleftBlockCenterCoordinates = new Vector2(
-        currentBuildingInstance.transform.position.x - (currentBuildingStats.size.x / 2 * 0.32f) + 0.3f,
-        currentBuildingInstance.transform.position.y - (currentBuildingStats.size.y / 2 * 0.32f) + 0.3f
+        currentBuildingInstance.transform.position.x - (currentBuildingStats.size.x / 2 * 0.32f) + 0.16f,
+        currentBuildingInstance.transform.position.y - (currentBuildingStats.size.y / 2 * 0.32f) + 0.16f
         );
         return bottomleftBlockCenterCoordinates;
     }

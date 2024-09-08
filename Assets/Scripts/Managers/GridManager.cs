@@ -49,8 +49,9 @@ public class GridManager : Singleton<GridManager>
 
     public Vector2Int WorldPositionToGrid(Vector2 worldPosition)
     {
-        int x = Mathf.FloorToInt(worldPosition.x / tileSize) + gridWidth / 2;
-        int y = Mathf.FloorToInt(worldPosition.y / tileSize) + gridHeight / 2;
+        // Round instead of floor for more accurate placement
+        int x = Mathf.RoundToInt((worldPosition.x / tileSize) + gridWidth / 2);
+        int y = Mathf.RoundToInt((worldPosition.y / tileSize) + gridHeight / 2);
 
         return new Vector2Int(x, y);
     }
@@ -63,32 +64,56 @@ public class GridManager : Singleton<GridManager>
         );
     }
 
+
     public bool IsValidGridPosition(Vector2Int gridPosition)
     {
         if (gridPosition.x < 0 || gridPosition.x > gridWidth - 1 || gridPosition.y < 0 || gridPosition.y > gridHeight - 1)
-            return false;       // if out of bounds return false
-        else
-        return !_grid[gridPosition.x, gridPosition.y].IsOccupied;   //return false if occupied.
+            return false; // if out of bounds, return false
+
+        return !_grid[gridPosition.x, gridPosition.y].IsOccupied; // return false if the tile is occupied
     }
+
 
     public void SetTile(Vector2Int gridPosition,GameObject occuppant)
     {
         _grid[gridPosition.x,gridPosition.y].SetOccupied(occuppant);
     }
 
-    public Tile ReturnClosestEmptyTile(Vector2Int tilePos)
+    public Tile ReturnClosestEmptyTile(Vector2Int targetPos)
     {
-        Tile closestTile = _grid[0,0];
-        foreach (var tile in _grid)
+        Tile closestTile = null;
+        float closestDistance = float.MaxValue;
+
+        // Loop through all grid positions to find the closest empty tile
+        for (int x = 0; x < gridWidth; x++)
         {
-            if (tile.IsOccupied) continue;
-            if (Vector2.Distance (closestTile.GridPosition,tilePos)  <= Vector2.Distance(tile.GridPosition, tilePos))
+            for (int y = 0; y < gridHeight; y++)
             {
-                Debug.Log("Nearest empty tile is this far away :"+Vector2.Distance(closestTile.GridPosition, tilePos));
-                closestTile = tile;
+                Tile tile = _grid[x, y];
+
+                if (!tile.IsOccupied) // Only consider unoccupied tiles
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), targetPos);
+
+                    if (distance < closestDistance)
+                    {
+                        closestTile = tile;
+                        closestDistance = distance;
+                    }
+                }
             }
-            
         }
+
+        if (closestTile != null)
+        {
+            Debug.Log("Found closest empty tile at: " + closestTile.GridPosition + " Distance: " + closestDistance);
+        }
+        else
+        {
+            Debug.LogWarning("No empty tile found.");
+        }
+
         return closestTile;
     }
+
 }

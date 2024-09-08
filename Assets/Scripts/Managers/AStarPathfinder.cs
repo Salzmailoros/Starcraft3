@@ -16,26 +16,18 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         Tile startTile = gridManager.GetTile(start);
         Tile goalTile = gridManager.GetTile(goal);
 
-        // Check if start and goal are valid tiles
-        if (startTile == null || goalTile == null)
+        // Validate the start and goal tiles
+        if (!IsValidTile(startTile) || !IsValidTile(goalTile))
         {
-            Debug.LogError("Invalid start or goal tile!");
+            Debug.LogError("Invalid start or goal tile.");
             return null;
-        }
-
-        // Allow moving to the goal even if occupied by an enemy
-        // If the goal is occupied, move to the nearest free tile
-        if (goalTile.IsOccupied && goalTile != gridManager.GetTile(gridManager.WorldPositionToGrid(this.transform.position)))
-        {
-            Debug.Log("Goal tile is occupied, moving to closest tile.");
-            return FindClosestFreeTile(goalTile);
         }
 
         List<Tile> openSet = new List<Tile> { startTile };
         HashSet<Tile> closedSet = new HashSet<Tile>();
-        Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData = new Dictionary<Tile, (float, float, Tile)>
+        Dictionary<Tile, PathNode> pathData = new Dictionary<Tile, PathNode>
         {
-            [startTile] = (0f, GetDistance(startTile, goalTile), null)
+            [startTile] = new PathNode(0, GetDistance(startTile, goalTile), null)
         };
 
         while (openSet.Count > 0)
@@ -44,14 +36,13 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
 
             if (currentTile == goalTile)
             {
-                Debug.Log("Path found!");
                 return ReconstructPath(pathData, goalTile);
             }
 
             openSet.Remove(currentTile);
             closedSet.Add(currentTile);
 
-            foreach (Tile neighbor in GetNeighbours(currentTile))  // Only cardinal neighbors
+            foreach (Tile neighbor in GetCardinalNeighbours(currentTile))  // Ensure only cardinal neighbors
             {
                 if (closedSet.Contains(neighbor) || (neighbor.IsOccupied && neighbor != goalTile))
                     continue;
@@ -67,7 +58,7 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
                     continue;
                 }
 
-                pathData[neighbor] = (tentativeGCost, GetDistance(neighbor, goalTile), currentTile);
+                pathData[neighbor] = new PathNode(tentativeGCost, GetDistance(neighbor, goalTile), currentTile);
             }
         }
 
@@ -75,25 +66,18 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         return null;
     }
 
-    private List<Vector2Int> FindClosestFreeTile(Tile goalTile)
-    {
-        List<Vector2Int> closestTiles = new List<Vector2Int>();
-
-
-
-        return closestTiles;
-    }
-
-    private List<Tile> GetNeighbours(Tile tile)
+    // Get the valid cardinal neighbors of the tile (No diagonals)
+    private List<Tile> GetCardinalNeighbours(Tile tile)
     {
         List<Tile> neighbors = new List<Tile>();
 
+        // Only cardinal directions (right, left, up, down)
         Vector2Int[] directions = {
-        new Vector2Int(1, 0),  // Right
-        new Vector2Int(-1, 0), // Left
-        new Vector2Int(0, 1),  // Up
-        new Vector2Int(0, -1)  // Down
-    };
+            new Vector2Int(1, 0),  // Right
+            new Vector2Int(-1, 0), // Left
+            new Vector2Int(0, 1),  // Up
+            new Vector2Int(0, -1)  // Down
+        };
 
         foreach (Vector2Int direction in directions)
         {
@@ -101,7 +85,7 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
             if (gridManager.IsValidGridPosition(neighborPos))
             {
                 Tile neighborTile = gridManager.GetTile(neighborPos);
-                if (neighborTile != null)
+                if (neighborTile != null && !neighborTile.IsOccupied)  // Ensure tile is unoccupied
                 {
                     neighbors.Add(neighborTile);
                 }
@@ -111,32 +95,41 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         return neighbors;
     }
 
-
-    private List<Vector2Int> ReconstructPath(Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData, Tile goalTile)
+    // Reconstruct the path from the start to goal tile
+    private List<Vector2Int> ReconstructPath(Dictionary<Tile, PathNode> pathData, Tile goalTile)
     {
         List<Vector2Int> path = new List<Vector2Int> { goalTile.GridPosition };
-
         Tile currentTile = goalTile;
+
         while (pathData[currentTile].Parent != null)
         {
             currentTile = pathData[currentTile].Parent;
+
+            // Skip any unnecessary steps where the next step is the same as the current position
+            if (pathData[currentTile].Parent == null) continue;
+
             path.Add(currentTile.GridPosition);
         }
 
-        path.Reverse(); // Reverse to get the path from start to goal
+        path.Reverse();
         return path;
     }
 
+    private float GetDistance(Tile a, Tile b)
+    {
+        return Mathf.Abs(b.GridPosition.x - a.GridPosition.x) + Mathf.Abs(b.GridPosition.y - a.GridPosition.y);
+    }
 
 
-    private Tile GetTileWithLowestFCost(List<Tile> openSet, Dictionary<Tile, (float GCost, float HCost, Tile Parent)> pathData)
+    // Find the tile with the lowest FCost in the open set
+    private Tile GetTileWithLowestFCost(List<Tile> openSet, Dictionary<Tile, PathNode> pathData)
     {
         Tile lowestTile = openSet[0];
-        float lowestFCost = pathData[lowestTile].GCost + pathData[lowestTile].HCost;
+        float lowestFCost = pathData[lowestTile].FCost;
 
         foreach (Tile tile in openSet)
         {
-            float fCost = pathData[tile].GCost + pathData[tile].HCost;
+            float fCost = pathData[tile].FCost;
             if (fCost < lowestFCost || (fCost == lowestFCost && pathData[tile].HCost < pathData[lowestTile].HCost))
             {
                 lowestTile = tile;
@@ -147,11 +140,26 @@ public class AStarPathfinder : Singleton<AStarPathfinder>
         return lowestTile;
     }
 
-    private float GetDistance(Tile a, Tile b)
+    // Validates a tile
+    private bool IsValidTile(Tile tile)
     {
-        float dx = Mathf.Abs(a.GridPosition.x - b.GridPosition.x);
-        float dy = Mathf.Abs(a.GridPosition.y - b.GridPosition.y);
-        return Mathf.Sqrt(dx * dx + dy * dy);
+        return tile != null;
     }
+}
 
+// Helper class for pathfinding nodes
+public class PathNode
+{
+    public float GCost;   // Distance from the start tile
+    public float HCost;   // Heuristic: distance to the goal tile
+    public Tile Parent;   // Parent tile to reconstruct the path
+
+    public float FCost => GCost + HCost;  // Total cost (G + H)
+
+    public PathNode(float gCost, float hCost, Tile parent)
+    {
+        GCost = gCost;
+        HCost = hCost;
+        Parent = parent;
+    }
 }

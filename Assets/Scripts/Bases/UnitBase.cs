@@ -18,6 +18,7 @@ public abstract class UnitBase : MonoBehaviour
     private Vector2Int currentGridPos;
 
     private Material materialForHPBar;
+    private IDamageable myDamageableComponent;  // This unit's IDamageable component
 
     public virtual void Initialize(UnitStats stats)
     {
@@ -29,6 +30,9 @@ public abstract class UnitBase : MonoBehaviour
         gridManager = GridManager.Instance;
         materialForHPBar = GetComponent<SpriteRenderer>().material;
         currentGridPos = gridManager.WorldPositionToGrid(transform.position);
+
+        // Cache this unit's IDamageable component
+        myDamageableComponent = GetComponent<IDamageable>();
     }
 
     public virtual void TakeDamage(float damage)
@@ -62,19 +66,31 @@ public abstract class UnitBase : MonoBehaviour
 
             float distance = Vector3.Distance(transform.position, target.transform.position);
 
-            // If the target is within attack range and movement is finished, attack
-            if (distance <= stats.range && !isMoving)
+            // Check if target is within attack range
+            if (distance <= stats.range)
             {
-                if (Time.time >= lastAttackTime + (1 / stats.attackSpeed))
+                // Stop moving when within range
+                isMoving = false;
+
+                // Check if the target is on the same team
+                if (myDamageableComponent != null && currentTarget.TeamID != myDamageableComponent.TeamID)
                 {
-                    lastAttackTime = Time.time;
-                    currentTarget.TakeDamage(currentDamage);
-                    Debug.Log("BOOP");
+                    // Attack if attack cooldown has passed
+                    if (Time.time >= lastAttackTime + (1 / stats.attackSpeed))
+                    {
+                        lastAttackTime = Time.time;
+                        currentTarget.TakeDamage(currentDamage);
+                        Debug.Log("BOOP");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Target is on the same team, cannot attack.");
                 }
             }
-            else if (!isMoving && !hasNewCommand)  // Move only if there's no new command
+            else if (!isMoving && !hasNewCommand)  // If not moving, move toward the target if out of range
             {
-                MoveTo(gridManager.WorldPositionToGrid(target.transform.position));
+                StartCoroutine(MoveAlongPath(gridManager.WorldPositionToGrid(target.transform.position)));  // Corrected here
             }
         }
     }
@@ -82,6 +98,7 @@ public abstract class UnitBase : MonoBehaviour
     public void Attack(IDamageable damageableTarget)
     {
         hasNewCommand = true;  // Flag for new command
+
         if (currentTarget != damageableTarget)
         {
             ResetTarget();  // Reset current actions before switching targets
@@ -89,23 +106,21 @@ public abstract class UnitBase : MonoBehaviour
 
         currentTarget = damageableTarget;
 
-        MonoBehaviour target = currentTarget as MonoBehaviour;
-        if (target != null)
+        // Check if the target is not on the same team
+        if (myDamageableComponent != null && currentTarget.TeamID != myDamageableComponent.TeamID)
         {
-            Vector2Int targetGridPos = gridManager.WorldPositionToGrid(target.transform.position);
-            MoveTo(targetGridPos);  // Move to the target's position
+            MonoBehaviour target = currentTarget as MonoBehaviour;
+            if (target != null)
+            {
+                Vector2Int targetGridPos = gridManager.WorldPositionToGrid(target.transform.position);
+                StartCoroutine(MoveAlongPath(targetGridPos));  // Correct movement
+            }
         }
-
-        hasNewCommand = false;  // New command is handled
-    }
-
-    public void MoveTo(Vector2Int newPosition)
-    {
-        hasNewCommand = true;  // Mark new command
-        ResetTarget();  // Stop any current action and reset target
-
-        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
-        moveCoroutine = StartCoroutine(MoveAlongPath(newPosition));
+        else
+        {
+            Debug.LogWarning("Cannot attack a target on the same team.");
+            currentTarget = null; // Clear target if on the same team
+        }
 
         hasNewCommand = false;  // New command is handled
     }
@@ -189,4 +204,15 @@ public abstract class UnitBase : MonoBehaviour
     {
         return stats;
     }
+    public void MoveTo(Vector2Int newPosition)
+    {
+        hasNewCommand = true;  // Mark new command
+        ResetTarget();  // Stop any current action and reset target
+
+        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
+        moveCoroutine = StartCoroutine(MoveAlongPath(newPosition));  // Start moving to the new position
+
+        hasNewCommand = false;  // Command has been handled
+    }
+
 }
